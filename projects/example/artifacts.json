@@ -1,0 +1,12 @@
+[
+  {
+    "id": "docker-registry",
+    "name": "Docker registry",
+    "source":{
+      "url": "docker-registry",
+      "type": "docker"
+    },
+    "tag":"latest",
+    "type":"docker"
+  }
+]

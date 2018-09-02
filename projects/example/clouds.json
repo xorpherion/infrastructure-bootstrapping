@@ -1,0 +1,7 @@
+[
+  {
+    "id": "internal-infrastructure",
+    "machines":"server1",
+    "type": "docker"
+  }
+]

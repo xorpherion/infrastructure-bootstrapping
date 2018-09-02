@@ -1,0 +1,20 @@
+[
+  {
+    "id":"base",
+    "installs":[
+      "curl",
+      {
+        "name":"ping","version":"latest"
+      }
+    ]
+  },
+  {
+    "id":"docker",
+    "parents":[
+      "base"
+    ],
+    "installs":[
+      "docker"
+    ]
+  }
+]

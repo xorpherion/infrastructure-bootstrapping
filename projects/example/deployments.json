@@ -1,0 +1,31 @@
+[
+  {
+    "id":"boostrap",
+    "artifacts": [
+      {
+        "ref":"docker-registry",
+        "env": {
+            "SOME_ENV": "SOME_VALUE",
+            "SOME_OTHER_ENV": "SOME_OTHER_VALUE"
+        },
+        "type":"docker",
+        "host":"192.168.1.100",
+        "ports": [
+          1234,
+          {
+            "outer":1235,
+            "inner":1235,
+            "type":"tcp"
+          }
+        ],
+        "targets":[
+          {
+            "type": "machine",
+            "ref": "server1"
+          }
+        ]
+      }
+    ],
+    "type":"docker"
+  }
+]
