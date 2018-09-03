@@ -25,6 +25,6 @@ repositories {
 
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
-	compile('org.codehaus.groovy:groovy')
+	compile('org.codehaus.groovy:groovy-all')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
