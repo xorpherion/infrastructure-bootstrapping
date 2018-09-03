@@ -1,6 +1,9 @@
 [
   {
     "id":"till",
-    "authentications":"till-pub"
+    "username": "till",
+    "authentications": [
+      "till-pub"
+    ]
   }
 ]

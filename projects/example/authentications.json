@@ -1,13 +1,11 @@
 [
   {
     "id":"till-pub",
-    "username": "till",
     "secret":"PUBLICKEY",
     "type":"public-key"
   },
   {
     "id":"till-password",
-    "username": "till",
     "secret":"PASSWORD",
     "type":"password"
   }
