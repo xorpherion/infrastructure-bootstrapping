@@ -24,7 +24,7 @@ work in progress
 
 ## Plugins
 - comes default with
-    - cloud provision with xen server and centos
+    - cloud provision with KVM and container linux (CoreOS)
     - normalizing of machines through ssh
     - configuration for docker hosts
     - build and deploy with jenkins dsl plugin
