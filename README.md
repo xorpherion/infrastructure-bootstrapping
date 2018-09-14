@@ -1,4 +1,4 @@
-# bootstrapping-as-code
+# infrastructure-bootstrapping
 
 work in progress
 

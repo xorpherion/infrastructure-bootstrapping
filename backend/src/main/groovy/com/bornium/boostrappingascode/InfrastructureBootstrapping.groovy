@@ -4,9 +4,9 @@ import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 
 @SpringBootApplication
-class BoostrappingAsCodeApplication {
+class InfrastructureBootstrapping {
 
 	static void main(String[] args) {
-		SpringApplication.run BoostrappingAsCodeApplication, args
+		SpringApplication.run InfrastructureBootstrapping, args
 	}
 }
