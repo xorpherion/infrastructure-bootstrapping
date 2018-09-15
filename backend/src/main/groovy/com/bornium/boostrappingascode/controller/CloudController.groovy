@@ -16,8 +16,13 @@ public class CloudController {
         System.out.println(pid);
     }
 
+    @PostMapping
+    public void createCloud(){
+
+    }
+
     @PutMapping
-    public void putCloud(){
+    public void editCloud(){
 
     }
 
