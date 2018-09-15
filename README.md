@@ -2,6 +2,16 @@
 
 work in progress
 
+###Info
+Hypervisors/Physical machines need to have the user used by this project to be sudoer with NOPASSWD to use sudo.
+Run "visudo" and add as last line:
+```
+<username> ALL=(ALL) NOPASSWD:ALL
+```
+and fill in \<username\>
+
+This imposes security issues, e.g. leaving a workstation unattended when logged in enables an attacker to use root without a password.
+
 
 ##Basics
 
@@ -38,3 +48,5 @@ Plugins can be exchanges for other providers - e.g. instead of docker hosts one 
 - create configurations through web frontend
 - trigger actions by posting configuration to app
 - bootstrap infrastructure for the needs of your organisation
+
+

@@ -1,0 +1,1 @@
+docker run -d --restart=always -p 5432:5432 -e POSTGRES_DB=infrastructure-bootstrapping -e POSTGRES_USER=infrastructure-bootstrapping -e POSTGRES_PASSWORD=infrastructure-bootstrapping --name postgres-ib postgres:9.5

@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		springBootVersion = '1.5.15.RELEASE'
+		springBootVersion = '2.0.5.RELEASE'
 	}
 	repositories {
 		mavenCentral()
@@ -13,6 +13,7 @@ buildscript {
 apply plugin: 'groovy'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 
 group = 'com.bornium'
 version = '0.0.1-SNAPSHOT'
@@ -25,8 +26,12 @@ repositories {
 
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
+	compile "org.springframework.boot:spring-boot-starter-data-jpa"
 	compile('org.codehaus.groovy:groovy-all')
+	compile('org.postgresql:postgresql') // add to notice
 	compile group: 'com.jcraft', name: 'jsch', version: '0.1.54'
+	compile 'io.springfox:springfox-swagger2:2.9.2' //add to notice
+	compile 'io.springfox:springfox-swagger-ui:2.9.2' // add to notice
 
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
