@@ -26,5 +26,7 @@ repositories {
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.codehaus.groovy:groovy-all')
+	compile group: 'com.jcraft', name: 'jsch', version: '0.1.54'
+
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
