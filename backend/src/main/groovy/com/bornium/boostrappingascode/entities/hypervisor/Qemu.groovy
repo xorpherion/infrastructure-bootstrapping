@@ -1,6 +1,6 @@
-package com.bornium.boostrappingascode.infrastructure.hypervisor
+package com.bornium.boostrappingascode.entities.hypervisor
 
-import com.bornium.boostrappingascode.infrastructure.machine.VirtualMachine
+import com.bornium.boostrappingascode.entities.machine.VirtualMachine
 
 class Qemu extends Hypervisor {
     @Override
