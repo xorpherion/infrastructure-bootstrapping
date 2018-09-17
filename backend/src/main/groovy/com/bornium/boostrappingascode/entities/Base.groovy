@@ -1,33 +1,31 @@
 package com.bornium.boostrappingascode.entities
 
-import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonUnwrapped
+import io.swagger.annotations.ApiModelProperty
 
 import javax.persistence.Column
-import javax.persistence.EntityListeners
-import javax.persistence.GeneratedValue
+import javax.persistence.Embedded
+import javax.persistence.EmbeddedId
 import javax.persistence.Id
 import javax.persistence.MappedSuperclass
 import javax.persistence.PrePersist
 import javax.persistence.PreUpdate
-import javax.persistence.Temporal
-import javax.persistence.TemporalType
-import javax.persistence.Version
 import java.sql.Timestamp
-import java.time.Instant
 import java.time.ZonedDateTime
 
 @MappedSuperclass
 class Base {
 
-    @Id
-    @GeneratedValue
-    long id
+    @JsonUnwrapped
+    @EmbeddedId
+    BaseId baseId
 
+    @ApiModelProperty(hidden = true)
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     Timestamp created
 
+    @ApiModelProperty(hidden = true)
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     Timestamp modified
 
