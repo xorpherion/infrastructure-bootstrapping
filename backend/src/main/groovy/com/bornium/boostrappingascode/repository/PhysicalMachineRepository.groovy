@@ -1,8 +1,7 @@
 package com.bornium.boostrappingascode.repository
 
-import com.bornium.boostrappingascode.entities.machine.PhysicalMachine
-import org.springframework.data.jpa.repository.JpaRepository
+import com.bornium.boostrappingascode.entities.cloud.Cloud
 
-interface PhysicalMachineRepository extends JpaRepository<PhysicalMachine,Long> {
+interface PhysicalMachineRepository extends BaseRepository<Cloud> {
 
 }

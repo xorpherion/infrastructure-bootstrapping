@@ -1,4 +1,5 @@
-package com.bornium.boostrappingascode
+package com.bornium.boostrappingascode.configuration
+
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -13,6 +14,7 @@ class BeanConfiguration {
     @Bean
     Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
+                .ignoredParameterTypes(groovy.lang.MetaClass.class)
                 .select()
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())

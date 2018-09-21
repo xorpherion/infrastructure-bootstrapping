@@ -1,7 +1,7 @@
 package com.bornium.boostrappingascode.entities.hypervisor
 
-import com.bornium.boostrappingascode.entities.machine.VirtualMachine
 import com.bornium.boostrappingascode.access.Ssh
+import com.bornium.boostrappingascode.entities.machine.VirtualMachine
 
 abstract class Hypervisor {
     Ssh ssh

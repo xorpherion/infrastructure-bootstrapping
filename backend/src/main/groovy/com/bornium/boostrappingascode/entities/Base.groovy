@@ -1,16 +1,10 @@
 package com.bornium.boostrappingascode.entities
 
-import com.fasterxml.jackson.annotation.JsonProperty
+
 import com.fasterxml.jackson.annotation.JsonUnwrapped
 import io.swagger.annotations.ApiModelProperty
 
-import javax.persistence.Column
-import javax.persistence.Embedded
-import javax.persistence.EmbeddedId
-import javax.persistence.Id
-import javax.persistence.MappedSuperclass
-import javax.persistence.PrePersist
-import javax.persistence.PreUpdate
+import javax.persistence.*
 import java.sql.Timestamp
 import java.time.ZonedDateTime
 
@@ -30,14 +24,14 @@ class Base {
     Timestamp modified
 
     @PrePersist
-    void prePersist(){
+    void prePersist() {
         def ts = Timestamp.from(ZonedDateTime.now().toInstant())
         created = ts
         modified = ts
     }
 
     @PreUpdate
-    void preUpdate(){
+    void preUpdate() {
         modified = Timestamp.from(ZonedDateTime.now().toInstant())
     }
 

@@ -12,8 +12,8 @@ class DevMethods {
     int port = Integer.parseInt(System.getenv("PORT"))
 
     @Test
-    void sshTest(){
-        Ssh ssh = new Ssh(host,port,new User(user,new PasswordAuthentication(pwd)))
+    void sshTest() {
+        Ssh ssh = new Ssh(host, port, new User(user, new PasswordAuthentication(pwd)))
 
         ssh.connect()
         ssh.execSudo("virsh list --all")
@@ -21,16 +21,16 @@ class DevMethods {
     }
 
     @Test
-    void sshInit(){
-        Ssh ssh = new Ssh(host,port,new User(user,new PasswordAuthentication(pwd)))
+    void sshInit() {
+        Ssh ssh = new Ssh(host, port, new User(user, new PasswordAuthentication(pwd)))
 
         ssh.connect()
-        ssh.exec("date","date")
-        ssh.execSudo("date","date")
+        ssh.exec("date", "date")
+        ssh.execSudo("date", "date")
         ssh.exec("whoami")
         ssh.execSudo("whoami")
         ssh.execSudo("whoami")
-        ssh.exec("whoami","sudo whoami")
+        ssh.exec("whoami", "sudo whoami")
 
         ssh.disconnect()
     }

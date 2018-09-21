@@ -7,18 +7,18 @@ import static com.bornium.boostrappingascode.descriptions.Util.log
 class ArtifactTests {
 
     @Test
-    void createDockerArtifact(){
-        Artifact artifact = Artifact.docker("test-artifact","Test artifact",Source.dockerRegistry("docker-registry"),"latest")
+    void createDockerArtifact() {
+        Artifact artifact = Artifact.docker("test-artifact", "Test artifact", Source.dockerRegistry("docker-registry"), "latest")
         log(artifact)
     }
 
     @Test
-    void createMavenArtifact(){
+    void createMavenArtifact() {
 
     }
 
     @Test
-    void createGradleArtifact(){
+    void createGradleArtifact() {
 
     }
 }

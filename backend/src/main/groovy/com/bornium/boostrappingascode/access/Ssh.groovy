@@ -1,9 +1,7 @@
 package com.bornium.boostrappingascode.access
 
 import com.bornium.boostrappingascode.entities.user.User
-import com.jcraft.jsch.Channel
 import com.jcraft.jsch.ChannelExec
-import com.jcraft.jsch.ChannelShell
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
 
@@ -32,7 +30,7 @@ class Ssh {
         error = System.err
     }
 
-    void connect(){
+    void connect() {
         try {
             jsch = new JSch();
             session = jsch.getSession(user.name, host, port)
@@ -45,14 +43,14 @@ class Ssh {
             session.setOutputStream(output)
 
             session.connect(SSH_TIMEOUT)
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace()
             disconnect()
         }
     }
 
-    def exec(String... commands){
-        String command = String.join(";",commands)
+    def exec(String... commands) {
+        String command = String.join(";", commands)
         println "=== executing $command ==="
         def channel
         try {
@@ -64,33 +62,36 @@ class Ssh {
             InputStream inputStream = channel.getInputStream()
             OutputStream outputStream = channel.getOutputStream()
 
-            byte[] tmp=new byte[1024];
-            while(true){
-                while(inputStream.available()>0){
-                    int i=inputStream.read(tmp, 0, 1024);
-                    if(i<0)break;
+            byte[] tmp = new byte[1024];
+            while (true) {
+                while (inputStream.available() > 0) {
+                    int i = inputStream.read(tmp, 0, 1024);
+                    if (i < 0) break;
                     System.out.print(new String(tmp, 0, i));
                 }
-                if(channel.isClosed()){
-                    if(inputStream.available()>0) continue;
-                    System.out.println("exit-status: "+channel.getExitStatus());
+                if (channel.isClosed()) {
+                    if (inputStream.available() > 0) continue;
+                    System.out.println("exit-status: " + channel.getExitStatus());
                     break;
                 }
-                try{Thread.sleep(1000);}catch(Exception ee){}
+                try {
+                    Thread.sleep(1000);
+                } catch (Exception ee) {
+                }
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace()
-        }finally{
+        } finally {
             println "==="
             channel?.disconnect()
         }
     }
 
-    def execSudo(String... commands){
-        return exec(Stream.of(commands).map {command -> "sudo " + command}.collect(Collectors.toList()).toArray(new String[0]))
+    def execSudo(String... commands) {
+        return exec(Stream.of(commands).map { command -> "sudo " + command }.collect(Collectors.toList()).toArray(new String[0]))
     }
 
-    void disconnect(){
+    void disconnect() {
         session?.disconnect()
     }
 }

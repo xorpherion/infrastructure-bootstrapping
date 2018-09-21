@@ -1,7 +1,5 @@
 package com.bornium.boostrappingascode.descriptions.artifact
 
-import com.bornium.boostrappingascode.descriptions.DescriptionBase
-
 class Source {
     String url
     String type
@@ -13,11 +11,11 @@ class Source {
         return source
     }
 
-    static Source git(String url){
-        return from(url,"git")
+    static Source git(String url) {
+        return from(url, "git")
     }
 
-    static Source dockerRegistry(String url){
-        return from(url,"docker-registry")
+    static Source dockerRegistry(String url) {
+        return from(url, "docker-registry")
     }
 }
