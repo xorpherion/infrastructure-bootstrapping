@@ -3,6 +3,7 @@ package com.bornium.boostrappingascode.controller.objectmanagement
 import com.bornium.boostrappingascode.entities.Base
 import com.bornium.boostrappingascode.entities.BaseId
 import com.bornium.boostrappingascode.repository.BaseRepository
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 
@@ -10,7 +11,10 @@ import org.springframework.web.bind.annotation.*
 abstract class ObjectController<T extends Base, S extends BaseRepository<T>> {
 
     @Autowired
-    S repo;
+    S repo
+
+    @Autowired
+    ObjectMapper mapper
 
     @GetMapping
     List<T> getAll() {
@@ -30,15 +34,26 @@ abstract class ObjectController<T extends Base, S extends BaseRepository<T>> {
     @PutMapping("/{oid}")
     Optional<T> modify(@PathVariable("nid") String nid, @PathVariable("oid") String oid, @RequestBody T obj) {
         Optional<T> found = repo.findOneByBaseId(new BaseId(oid, nid))
-        //modify
         if (found.isPresent())
-            return repo.save(found)
-        return Optional.empty()
+            return Optional.empty()
+        Map original = toMap(found.get())
+        Map update = toMap(obj)
+        original.putAll(update)
+        T modified = toObj(original, obj.getClass())
+        return Optional.of(repo.save(modified))
     }
 
     @DeleteMapping("/{oid}")
     Optional<T> delete(@PathVariable("nid") String nid, @PathVariable("oid") String oid) {
         return repo.deleteByBaseId(new BaseId(nid, oid))
+    }
+
+    public <I> Map toMap(I obj) {
+        return mapper.readValue(mapper.writeValueAsString(obj), Map.class)
+    }
+
+    public <I> I toObj(Map map, Class<I> clazz) {
+        return mapper.readValue(mapper.writeValueAsString(map), clazz)
     }
 
 }
