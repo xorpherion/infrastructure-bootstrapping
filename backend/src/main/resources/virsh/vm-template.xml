@@ -1,0 +1,53 @@
+<domain type="kvm">
+    <name>${name}</name>
+    <uuid>${uuid}</uuid>
+    <memory unit="b">${memory}</memory>
+    <currentMemory unit="b">${memory}</currentMemory>
+    <vcpu>${cpus}</vcpu>
+    <os>
+        <type arch="x86_64">hvm</type>
+        <boot dev="cdrom"/>
+        <boot dev="hd"/>
+    </os>
+    <features>
+        <acpi/>
+        <apic/>
+    </features>
+    <cpu mode="host-model"/>
+    <clock offset="utc">
+        <timer name="rtc" tickpolicy="catchup"/>
+        <timer name="pit" tickpolicy="delay"/>
+        <timer name="hpet" present="no"/>
+    </clock>
+    <on_reboot>restart</on_reboot>
+    <pm>
+        <suspend-to-mem enabled="no"/>
+        <suspend-to-disk enabled="no"/>
+    </pm>
+    <devices>
+        <emulator>/usr/bin/kvm-spice</emulator>
+        <disk type="file" device="disk">
+            <driver name="qemu" type="qcow2"/>
+            <source file="${baseimg}"/>
+            <target dev="hda" bus="ide"/>
+        </disk>
+        <disk type="file" device="cdrom">
+            <driver name="qemu" type="raw"/>
+            <source file="${bootimg}"/>
+            <target dev="hdb" bus="ide"/>
+            <readonly/>
+        </disk>
+        <disk type="file" device="cdrom">
+            <driver name="qemu" type="raw"/>
+            <source file="${helperimg}"/>
+            <target dev="hdc" bus="ide"/>
+            <readonly/>
+        </disk>
+        <interface type="network">
+            <source network="default"/>
+            <mac address="${mac}"/>
+        </interface>
+        <graphics type="vnc" port="-1"/>
+        <console type="pty"/>
+    </devices>
+</domain>
