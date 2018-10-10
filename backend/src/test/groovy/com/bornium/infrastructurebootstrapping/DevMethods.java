@@ -1,15 +1,15 @@
-package com.bornium.boostrappingascode;
+package com.bornium.infrastructurebootstrapping;
 
-import com.bornium.boostrappingascode.access.Ssh;
-import com.bornium.boostrappingascode.commands.CloudCommands;
-import com.bornium.boostrappingascode.entities.cloud.Cloud;
-import com.bornium.boostrappingascode.entities.hypervisor.Virsh;
-import com.bornium.boostrappingascode.entities.machine.Disk;
-import com.bornium.boostrappingascode.entities.machine.Memory;
-import com.bornium.boostrappingascode.entities.machine.VirtualMachine;
-import com.bornium.boostrappingascode.entities.operatingsystem.ContainerLinux;
-import com.bornium.boostrappingascode.entities.user.PasswordAuthentication;
-import com.bornium.boostrappingascode.entities.user.User;
+import com.bornium.infrastructurebootstrapping.access.Ssh;
+import com.bornium.infrastructurebootstrapping.commands.CloudCommands;
+import com.bornium.infrastructurebootstrapping.entities.cloud.Cloud;
+import com.bornium.infrastructurebootstrapping.entities.hypervisor.Virsh;
+import com.bornium.infrastructurebootstrapping.entities.machine.Disk;
+import com.bornium.infrastructurebootstrapping.entities.machine.Memory;
+import com.bornium.infrastructurebootstrapping.entities.machine.VirtualMachine;
+import com.bornium.infrastructurebootstrapping.entities.operatingsystem.ContainerLinux;
+import com.bornium.infrastructurebootstrapping.entities.user.PasswordAuthentication;
+import com.bornium.infrastructurebootstrapping.entities.user.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
