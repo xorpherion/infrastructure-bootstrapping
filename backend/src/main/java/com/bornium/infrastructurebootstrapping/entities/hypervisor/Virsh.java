@@ -14,7 +14,7 @@ public class Virsh extends Hypervisor {
     }
 
     public Virsh(String host, Integer port, User user, String id) {
-        super(host, port, user, id, "virsh");
+        super(host, port, user, id, "hypervisor/virsh");
     }
 
     @Override

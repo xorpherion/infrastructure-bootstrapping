@@ -28,8 +28,9 @@ public class VirshProcessor extends HypervisorProcessor<Virsh> {
     @Override
     protected void initVm(VirtualMachine vm) throws Exception {
         ssh.execSudoPrint("mkdir -p " + vmPath(vm) + "/helper");
-        ssh.execSudoPrint("touch " + vmPath(vm) + "/helper/helper.txt");
-        ssh.execSudoPrint("bash -c 'echo helper > " + vmPath(vm) + "/helper/helper.txt'");
+        ssh.execSudoPrint("touch " + vmPath(vm) + "/helper/ignition");
+        ssh.execSudoPrint("bash -c 'echo \"" + createIgnitionFile(vm) + "\" > " + vmPath(vm) + "/helper/ignition'");
+        ssh.execSudoPrint("cp ib/images/" + vm.getOperatingSystem().getImageName() + " " + vmPath(vm) + "/helper/install.iso");
 
         ssh.execSudoPrint("mkisofs -o " + vmPath(vm) + "/helper.iso " + vmPath(vm) + "/helper");
 
@@ -40,8 +41,13 @@ public class VirshProcessor extends HypervisorProcessor<Virsh> {
         ssh.execSudoPrint("virsh start testvm");
     }
 
+    private String createIgnitionFile(VirtualMachine vm) throws IOException {
+        return StreamUtils.copyToString(this.getClass().getResourceAsStream("/operatingsystem/containerlinux/ignition-template"), Charset.defaultCharset())
+                .replace("\"", "\\\"");
+    }
+
     private String createVmXml(VirtualMachine vm) throws IOException {
-        String xml = StreamUtils.copyToString(this.getClass().getResourceAsStream("/virsh/vm-template.xml"), Charset.defaultCharset());
+        String xml = StreamUtils.copyToString(this.getClass().getResourceAsStream("/hypervisor/virsh/vm-template.xml"), Charset.defaultCharset());
 
         xml = xml
                 .replaceAll(Pattern.quote("${name}"), vm.getBaseId().getId())

@@ -19,7 +19,7 @@ import java.util.Map;
         property = "type")
 @JsonSubTypes({
         //@JsonSubTypes.Type(value = Qemu.class, name = "qemu"),
-        @JsonSubTypes.Type(value = Virsh.class, name = "virsh"),
+        @JsonSubTypes.Type(value = Virsh.class, name = "hypervisor/virsh"),
 })
 public abstract class Hypervisor extends Base {
 

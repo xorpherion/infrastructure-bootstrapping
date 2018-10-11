@@ -6,8 +6,8 @@
     <vcpu>${cpus}</vcpu>
     <os>
         <type arch="x86_64">hvm</type>
-        <boot dev="cdrom"/>
         <boot dev="hd"/>
+        <boot dev="cdrom"/>
     </os>
     <features>
         <acpi/>
@@ -43,8 +43,8 @@
             <target dev="hdc" bus="ide"/>
             <readonly/>
         </disk>
-        <interface type="network">
-            <source network="default"/>
+        <interface type="bridge">
+            <source bridge="br0"/>
             <mac address="${mac}"/>
         </interface>
         <graphics type="vnc" port="-1"/>
