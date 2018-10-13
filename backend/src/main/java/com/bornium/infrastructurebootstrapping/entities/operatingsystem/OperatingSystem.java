@@ -1,6 +1,7 @@
 package com.bornium.infrastructurebootstrapping.entities.operatingsystem;
 
 import com.bornium.infrastructurebootstrapping.entities.machine.VirtualMachine;
+import com.bornium.infrastructurebootstrapping.processors.hypervisor.HypervisorProcessor;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -36,4 +37,8 @@ public abstract class OperatingSystem {
     public void setType(String type) {
         this.type = type;
     }
+
+    public abstract String getInstallAndShutdownCommand(String helperInstallDevice);
+
+    public abstract void createInstallHelperFiles(HypervisorProcessor processor, VirtualMachine vm) throws Exception;
 }

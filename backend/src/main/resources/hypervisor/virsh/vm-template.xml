@@ -19,7 +19,10 @@
         <timer name="pit" tickpolicy="delay"/>
         <timer name="hpet" present="no"/>
     </clock>
+    <on_poweroff>destroy</on_poweroff>
     <on_reboot>restart</on_reboot>
+    <on_crash>restart</on_crash>
+
     <pm>
         <suspend-to-mem enabled="no"/>
         <suspend-to-disk enabled="no"/>
@@ -45,9 +48,13 @@
         </disk>
         <interface type="bridge">
             <source bridge="br0"/>
+            <model type="virtio"/>
             <mac address="${mac}"/>
+            <protocol family="ipv4">
+                <dhcp/>
+            </protocol>
         </interface>
-        <graphics type="vnc" port="-1"/>
+        <graphics type="vnc" autoport="yes" listen="0.0.0.0"/>
         <console type="pty"/>
     </devices>
 </domain>

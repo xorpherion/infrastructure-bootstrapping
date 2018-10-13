@@ -21,11 +21,11 @@
 //        createVMDirectory(vm);
 //        createDisk(vm);
 //        downloadImage(vm);
-//        initVm(vm);
+//        installVm(vm);
 //        getSsh().exec("whoami");
 //    }
 //
-//    private void initVm(VirtualMachine vm) {
+//    private void installVm(VirtualMachine vm) {
 //        ssh.execSudo("qemu-system-x86_64 -vnc :0 -daemonize -enable-kvm -hda " + baseImagePath(vm)+ " -cdrom " + getImagePath(vm) + " -m " + vm.getRam().megabytes() + " -name " + vm.getBaseId().getId());
 //    }
 //

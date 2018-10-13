@@ -1,5 +1,6 @@
 package com.bornium.infrastructurebootstrapping.processors.hypervisor;
 
+import com.bornium.infrastructurebootstrapping.access.Vnc;
 import com.bornium.infrastructurebootstrapping.entities.hypervisor.Virsh;
 import com.bornium.infrastructurebootstrapping.entities.machine.VirtualMachine;
 import org.springframework.util.StreamUtils;
@@ -16,21 +17,9 @@ public class VirshProcessor extends HypervisorProcessor<Virsh> {
     }
 
     @Override
-    protected void cleanupCreate(VirtualMachine vm) {
-    }
-
-    @Override
-    protected void mountInstallFiles() {
-        //ssh.execSudo("virsh pool-create-as --name testpool --type dir --target ~/ib/images");
-        //ssh.execSudo("virsh pool-start testpool");
-    }
-
-    @Override
-    protected void initVm(VirtualMachine vm) throws Exception {
+    protected void installVm(VirtualMachine vm) throws Exception {
         ssh.execSudoPrint("mkdir -p " + vmPath(vm) + "/helper");
-        ssh.execSudoPrint("touch " + vmPath(vm) + "/helper/ignition");
-        ssh.execSudoPrint("bash -c 'echo \"" + createIgnitionFile(vm) + "\" > " + vmPath(vm) + "/helper/ignition'");
-        ssh.execSudoPrint("cp ib/images/" + vm.getOperatingSystem().getImageName() + " " + vmPath(vm) + "/helper/install.iso");
+        vm.getOperatingSystem().createInstallHelperFiles(this, vm);
 
         ssh.execSudoPrint("mkisofs -o " + vmPath(vm) + "/helper.iso " + vmPath(vm) + "/helper");
 
@@ -39,12 +28,26 @@ public class VirshProcessor extends HypervisorProcessor<Virsh> {
         ssh.execSudoPrint("virsh define " + vmPath(vm) + "/vm.xml");
         ssh.execSudoPrint("virsh autostart testvm");
         ssh.execSudoPrint("virsh start testvm");
+
+        //TODO actually look at the images received to see if terminal is ready instead of waiting 60 secs
+        Thread.sleep(60000);
+
+        Vnc vnc = new Vnc(hypervisor.getHost());
+        vnc.exec(vm.getOperatingSystem().getInstallAndShutdownCommand("/dev/sr1"));
+        vnc.close();
+
+        System.out.println("Waiting for install");
+        while (true) {
+            String vmState = ssh.execSudo("virsh domstate " + vm.getBaseId().getId());
+            Thread.sleep(1000);
+            if (vmState.contains("shut off"))
+                break;
+        }
+        System.out.println("Install done");
+
+        ssh.execSudoPrint("virsh start " + vm.getBaseId().getId());
     }
 
-    private String createIgnitionFile(VirtualMachine vm) throws IOException {
-        return StreamUtils.copyToString(this.getClass().getResourceAsStream("/operatingsystem/containerlinux/ignition-template"), Charset.defaultCharset())
-                .replace("\"", "\\\"");
-    }
 
     private String createVmXml(VirtualMachine vm) throws IOException {
         String xml = StreamUtils.copyToString(this.getClass().getResourceAsStream("/hypervisor/virsh/vm-template.xml"), Charset.defaultCharset());

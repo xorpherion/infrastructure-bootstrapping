@@ -28,16 +28,11 @@ public abstract class HypervisorProcessor<T extends Hypervisor> {
             createVMDirectory(vm);
             createDisk(vm);
             downloadImage(vm);
-            mountInstallFiles();
-            initVm(vm);
-            vm.getOperatingSystem().installOS(vm);
-            cleanupCreate(vm);
+            installVm(vm);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-    protected abstract void cleanupCreate(VirtualMachine vm);
 
     public String getWorkdir() {
         return "ib";
@@ -55,9 +50,7 @@ public abstract class HypervisorProcessor<T extends Hypervisor> {
         return getImages() + "/" + vm.getOperatingSystem().getImageName();
     }
 
-    protected abstract void mountInstallFiles();
-
-    protected abstract void initVm(VirtualMachine vm) throws Exception;
+    protected abstract void installVm(VirtualMachine vm) throws Exception;
 
     protected void downloadImage(VirtualMachine vm) {
         String imgName = vm.getOperatingSystem().getDownloadLink();
@@ -68,7 +61,7 @@ public abstract class HypervisorProcessor<T extends Hypervisor> {
         ssh.execPrint("mkdir -p " + vmPath(vm));
     }
 
-    protected String vmPath(VirtualMachine vm) {
+    public String vmPath(VirtualMachine vm) {
         return getBase() + "/" + vm.getBaseId().getId();
     }
 
@@ -80,5 +73,11 @@ public abstract class HypervisorProcessor<T extends Hypervisor> {
 
     public abstract void delete(VirtualMachine vm);
 
+    public T getHypervisor() {
+        return hypervisor;
+    }
 
+    public Ssh getSsh() {
+        return ssh;
+    }
 }
