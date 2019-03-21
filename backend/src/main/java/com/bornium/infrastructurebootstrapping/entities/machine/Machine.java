@@ -22,6 +22,7 @@ import javax.persistence.Transient;
 })
 public abstract class Machine extends Base {
 
+    private String ip;
     @Transient
     String type;
 
@@ -35,10 +36,9 @@ public abstract class Machine extends Base {
     String mac;
 
     public Machine() {
-        this(null, null, null, null, null, -1, null);
     }
 
-    public Machine(String id, String type, OperatingSystem operatingSystem, Disk disk, Memory ram, int cpus, String mac) {
+    public Machine(String id, String type, OperatingSystem operatingSystem, Disk disk, Memory ram, int cpus, String mac, String ip) {
         getBaseId().setId(id);
         this.type = type;
         this.operatingSystem = operatingSystem;
@@ -46,6 +46,7 @@ public abstract class Machine extends Base {
         this.ram = ram;
         this.cpus = cpus;
         this.mac = mac;
+        this.ip = ip;
     }
 
     public String getType() {
@@ -94,5 +95,13 @@ public abstract class Machine extends Base {
 
     public void setMac(String mac) {
         this.mac = mac;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 }

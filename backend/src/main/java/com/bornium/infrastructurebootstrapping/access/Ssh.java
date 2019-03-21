@@ -4,7 +4,6 @@ import com.bornium.infrastructurebootstrapping.entities.user.User;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
-import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -54,10 +53,30 @@ public class Ssh {
     }
 
     public String exec(String... commands) {
+        return execInternal(joinCommands(commands));
+    }
+
+    public String execPrint(String... commands) {
+        System.out.println("=== executing " + joinCommands(commands) + " ===");
+        String res = exec(commands);
+        System.out.println(res);
+        return res;
+    }
+
+    public String execSudo(String... commands) {
+        return execInternal(joinCommands(Stream.of(commands).map(cmd -> "sudo " + cmd).collect(Collectors.toList()).toArray(new String[0])));
+    }
+
+    public String execSudoPrint(String... commands) {
+        System.out.println("=== executing " + joinCommands(commands) + " ===");
+        String res = execSudo(commands);
+        System.out.println(res);
+        return res;
+    }
+
+    private String execInternal(String command) {
         if (session == null)
             connect();
-        String command = String.join(";", commands);
-        DefaultGroovyMethods.println(this, "=== executing " + command + " ===");
         ChannelExec channel = null;
         String result = "";
         try {
@@ -84,7 +103,7 @@ public class Ssh {
                     result += (new String(tmp, 0, i));
                 }
 
-                if (((ChannelExec) channel).isClosed()) {
+                if ((channel).isClosed()) {
                     if (inputStream.available() > 0) continue;
                     if (errStream.available() > 0) continue;
                     result += ("exit-status: " + ((ChannelExec) channel).getExitStatus());
@@ -105,23 +124,10 @@ public class Ssh {
                 channel.disconnect();
             return result;
         }
-
     }
 
-    public String execPrint(String... commands) {
-        String res = exec(commands);
-        System.out.println(res);
-        return res;
-    }
-
-    public String execSudo(String... commands) {
-        return exec(Stream.of(commands).map(cmd -> "sudo " + cmd).collect(Collectors.toList()).toArray(new String[0]));
-    }
-
-    public String execSudoPrint(String... commands) {
-        String res = execSudo(commands);
-        System.out.println(res);
-        return res;
+    private String joinCommands(String... commands) {
+        return String.join(";", commands);
     }
 
     public void disconnect() {

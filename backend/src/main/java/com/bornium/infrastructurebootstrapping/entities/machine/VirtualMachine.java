@@ -8,11 +8,10 @@ import javax.persistence.Entity;
 public class VirtualMachine extends Machine {
 
     public VirtualMachine() {
-        this(null, null, null, null, -1, null);
     }
 
-    public VirtualMachine(String id, OperatingSystem operatingSystem, Disk disk, Memory ram, int cpus, String mac) {
-        super(id, "virtual", operatingSystem, disk, ram, cpus, mac);
+    public VirtualMachine(String id, OperatingSystem operatingSystem, Disk disk, Memory ram, int cpus, String mac, String ip) {
+        super(id, "virtual", operatingSystem, disk, ram, cpus, mac, ip);
     }
 
     private boolean managed = true;

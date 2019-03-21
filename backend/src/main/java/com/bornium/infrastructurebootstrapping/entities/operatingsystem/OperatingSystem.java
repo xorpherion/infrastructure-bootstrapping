@@ -20,8 +20,6 @@ public abstract class OperatingSystem {
 
     public abstract String getDownloadLink();
 
-    public abstract void installOS(VirtualMachine vm);
-
     public OperatingSystem() {
         this(null);
     }
@@ -38,7 +36,7 @@ public abstract class OperatingSystem {
         this.type = type;
     }
 
-    public abstract String getInstallAndShutdownCommand(String helperInstallDevice);
+    public abstract String getVncCommandForInstallAndShutdown(VirtualMachine vm, String helperInstallDevice);
 
     public abstract void createInstallHelperFiles(HypervisorProcessor processor, VirtualMachine vm) throws Exception;
 }

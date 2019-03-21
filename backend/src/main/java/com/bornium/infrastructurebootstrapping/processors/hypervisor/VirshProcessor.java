@@ -33,7 +33,7 @@ public class VirshProcessor extends HypervisorProcessor<Virsh> {
         Thread.sleep(60000);
 
         Vnc vnc = new Vnc(hypervisor.getHost());
-        vnc.exec(vm.getOperatingSystem().getInstallAndShutdownCommand("/dev/sr1"));
+        vnc.exec(vm.getOperatingSystem().getVncCommandForInstallAndShutdown(vm, "/dev/sr1"));
         vnc.close();
 
         System.out.println("Waiting for install");

@@ -14,7 +14,7 @@ public class ContainerLinux extends OperatingSystem {
     }
 
     @Override
-    public String getInstallAndShutdownCommand(String helperInstallDevice) {
+    public String getVncCommandForInstallAndShutdown(VirtualMachine vm, String helperInstallDevice) {
         return "sudo mount " + helperInstallDevice + " /mnt;sudo coreos-install -d /dev/sda -i /mnt/ignition;sudo shutdown now";
     }
 
@@ -33,11 +33,6 @@ public class ContainerLinux extends OperatingSystem {
     @Override
     public String getDownloadLink() {
         return "https://stable.release.core-os.net/amd64-usr/current/coreos_production_iso_image.iso";
-    }
-
-    @Override
-    public void installOS(VirtualMachine vm) {
-
     }
 
     private String createIgnitionFile(VirtualMachine vm) throws IOException {
