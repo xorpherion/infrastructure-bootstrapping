@@ -1,38 +1,112 @@
 package com.bornium.infrastructurebootstrapping.crypto.services;
 
+import com.bornium.infrastructurebootstrapping.crypto.services.openssl.OpenSSLExtension;
+import com.bornium.infrastructurebootstrapping.crypto.services.openssl.SAN;
+import com.bornium.infrastructurebootstrapping.crypto.services.openssl.X509Subject;
 import com.bornium.infrastructurebootstrapping.services.execution.docker.ContainerShell;
 import com.bornium.infrastructurebootstrapping.services.execution.docker.DockerService;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
 @Service
 public class OpenSSLService {
 
+    boolean debug = false;
     final DockerService dockerService;
 
     public OpenSSLService(DockerService dockerService) {
         this.dockerService = dockerService;
     }
 
-    public void doInOpenSSL(Consumer<ContainerShell> run) {
-        dockerService.doInContainerFromDirectory("src/main/resources/docker/openssl/", run);
+    public void doWithOpenSSL(Consumer<ContainerShell> run) {
+        dockerService.doInContainerFromDirectory("src/main/resources/files/docker/openssl/", run);
+    }
+
+    Path templateConfig(Path csrConfig, X509Subject subject, SAN san) {
+        try {
+            String content = new String(Files.readAllBytes(csrConfig));
+            Path temp = Files.createTempFile("ib", ".conf");
+
+            if (subject != null)
+                content = replaceSubject(subject, content);
+            if (san != null)
+                content = replaceSAN(san, content);
+
+            if (debug)
+                System.out.println(content);
+            Files.write(temp, content.getBytes());
+            temp.toFile().deleteOnExit();
+            return temp;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String replaceSubject(X509Subject subject, String content) {
+        return content
+                .replace("${subject}", subject.toOpenSSLConfig());
+    }
+
+    private String replaceSAN(SAN san, String contentNew) {
+        if (!san.toOpenSSLConfig().isEmpty())
+            contentNew = contentNew.replace("${san}", san.toOpenSSLConfig());
+        else
+            contentNew = contentNew
+                    .replace("[ alt_names ]", "")
+                    .replace("${san}", "")
+                    .replace("req_extensions      = req_ext", "");
+        return contentNew;
     }
 
     public void createPrivateKey(Path destination) {
-        doInOpenSSL((shell) -> {
+        doWithOpenSSL((shell) -> {
             System.out.println(shell.run("openssl genrsa -out private.pem 4096"));
             System.out.println(dockerService.getFrom(shell.getContainerName(), "/private.pem", destination.toString()));
         });
     }
 
-    public void createCsr(Path privateKey, Path config, X509Subject subject, Path destination) {
-        doInOpenSSL(shell -> {
+    public void createCsr(Path privateKey, Path config, X509Subject subject, SAN san, Path destination) {
+        doWithOpenSSL(shell -> {
             System.out.println(dockerService.putInto(shell.getContainerName(), privateKey.toString(), "/private.pem"));
-            System.out.println(dockerService.putInto(shell.getContainerName(), config.toString(), "/openssl.conf"));
-            System.out.println(shell.run("openssl req -new -key private.pem -out cert.csr -subj '" + subject.toOpenSSL() + "'"));
+            System.out.println(dockerService.putInto(shell.getContainerName(), templateConfig(config, subject, san).toString(), "/openssl.conf"));
+            System.out.println(shell.run("openssl req -new -key private.pem -out cert.csr -config openssl.conf"));
+            if (debug)
+                System.out.println(shell.run("openssl req -in cert.csr -noout -text"));
             System.out.println(dockerService.getFrom(shell.getContainerName(), "/cert.csr", destination.toString()));
+        });
+    }
+
+    public void createSelfSignedCert(Path privateKey, Path config, X509Subject subject, SAN san, OpenSSLExtension extension, Path destination) {
+        doWithOpenSSL(shell -> {
+            System.out.println(dockerService.putInto(shell.getContainerName(), privateKey.toString(), "/private.pem"));
+            System.out.println(dockerService.putInto(shell.getContainerName(), templateConfig(config, subject, san).toString(), "/openssl.conf"));
+            System.out.println(shell.run("openssl req -extensions " + extension.getValue() + " -new -x509 -key private.pem -out cert.pem -config openssl.conf"));
+            if (debug)
+                System.out.println(shell.run("openssl x509 -in cert.pem -noout -text"));
+            System.out.println(dockerService.getFrom(shell.getContainerName(), "/cert.pem", destination.toString()));
+        });
+    }
+
+    public void signCsr(Path privateKey, Path cert, Path config, Path csr, OpenSSLExtension extension, Path destination) {
+        doWithOpenSSL(shell -> {
+            System.out.println(dockerService.putInto(shell.getContainerName(), privateKey.toString(), "/ca-key.pem"));
+            System.out.println(dockerService.putInto(shell.getContainerName(), cert.toString(), "/ca-cert.pem"));
+            System.out.println(dockerService.putInto(shell.getContainerName(), templateConfig(config, null, null).toString(), "/openssl.conf"));
+            System.out.println(dockerService.putInto(shell.getContainerName(), csr.toString(), "/cert.csr"));
+            System.out.println(shell.run("openssl x509 -req -in cert.csr -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial -out cert.pem"));
+            if (debug)
+                System.out.println(shell.run("openssl x509 -in cert.pem -noout -text"));
+            System.out.println(dockerService.getFrom(shell.getContainerName(), "/cert.pem", destination.toString()));
+        });
+    }
+
+    public void createCA(Path privateKey, Path config, Path destination) {
+        doWithOpenSSL(shell -> {
+
         });
     }
 }

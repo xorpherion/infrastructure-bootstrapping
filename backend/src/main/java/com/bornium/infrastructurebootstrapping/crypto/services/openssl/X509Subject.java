@@ -1,4 +1,4 @@
-package com.bornium.infrastructurebootstrapping.crypto.services;
+package com.bornium.infrastructurebootstrapping.crypto.services.openssl;
 
 public class X509Subject {
 
@@ -7,6 +7,8 @@ public class X509Subject {
     String l;
     String o;
     String cn;
+    String oun;
+    String email;
 
     public X509Subject(String c, String st, String l, String o, String cn) {
         this.c = c;
@@ -16,8 +18,12 @@ public class X509Subject {
         this.cn = cn;
     }
 
-    public String toOpenSSL() {
-        return "/C=" + getC() + "/ST=" + getSt() + "/L=" + getL() + "/O=" + getO() + "/CN=" + getCn();
+    public String toOpenSSLConfig() {
+        return "countryName=" + c + "\n" +
+                "stateOrProvinceName=" + st + "\n" +
+                "localityName=" + l + "\n" +
+                "0.organizationName=" + o + "\n" +
+                "commonName=" + cn + "\n";
     }
 
     public String getC() {

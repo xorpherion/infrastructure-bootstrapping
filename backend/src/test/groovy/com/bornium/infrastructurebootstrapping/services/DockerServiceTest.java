@@ -10,7 +10,7 @@ public class DockerServiceTest {
     public void test() {
         DockerService dockerService = new DockerService(new CommandRunner());
 
-        dockerService.doInContainerFromDirectory("src/main/resources/docker/openssl/", (shell) -> {
+        dockerService.doInContainerFromDirectory("src/main/resources/files/docker/openssl/", (shell) -> {
             System.out.println(shell.run("openssl genrsa -out private.pem 4096"));
             System.out.println(dockerService.getFrom(shell.getContainerName(), "/private.pem", "temp/private.pem"));
             System.out.println(shell.run("mkdir -p /crypto"));
