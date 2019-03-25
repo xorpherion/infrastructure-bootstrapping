@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 @Service
 public class OpenSSLService {
 
-    boolean debug = true;
+    boolean debug = false;
     final DockerService dockerService;
 
     public OpenSSLService(DockerService dockerService) {
@@ -23,7 +23,16 @@ public class OpenSSLService {
     }
 
     public void doWithOpenSSL(Consumer<ContainerShell> run) {
-        dockerService.doInContainerFromDirectory("src/main/resources/files/docker/openssl/", run);
+        dockerService.doInContainerFromDirectory("src/main/resources/files/docker/openssl/", (shell) -> {
+            // this should actually be mounted into the container to preserve those files
+            // currently those are created on the fly in the container
+            shell.run("mkdir certs");
+            shell.run("mkdir crl");
+            shell.run("mkdir newcerts");
+            shell.run("touch index.txt");
+            shell.run("touch serial && echo '01' >> serial");
+            run.accept(shell);
+        });
     }
 
     Path templateConfig(Path csrConfig, X509Subject subject, SAN san) {
@@ -61,9 +70,9 @@ public class OpenSSLService {
         return contentNew.replace("${san}", san.toOpenSSLConfig());
     }
 
-    public void createPrivateKey(Path destination) {
+    public void createPrivateKey(Path destination, int strength) {
         doWithOpenSSL((shell) -> {
-            System.out.println(shell.run("openssl genrsa -out private.pem 4096"));
+            System.out.println(shell.run("openssl genrsa -out private.pem " + strength));
             System.out.println(dockerService.getFrom(shell.getContainerName(), "/private.pem", destination.toString()));
         });
     }
@@ -96,7 +105,7 @@ public class OpenSSLService {
             System.out.println(dockerService.putInto(shell.getContainerName(), cert.toString(), "/ca-cert.pem"));
             System.out.println(dockerService.putInto(shell.getContainerName(), templateConfig(config, null, null).toString(), "/openssl.conf"));
             System.out.println(dockerService.putInto(shell.getContainerName(), csr.toString(), "/cert.csr"));
-            System.out.println(shell.run("openssl x509 -req -extfile openssl.conf -extensions " + extension.getValue() + " -in cert.csr -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial -out cert.pem"));
+            System.out.println(shell.run("openssl ca -batch -config openssl.conf -extensions " + extension.getValue() + " -in cert.csr -cert ca-cert.pem -keyfile ca-key.pem -out cert.pem -policy policy_loose"));
             if (debug)
                 System.out.println(shell.run("openssl x509 -in cert.pem -noout -text"));
             System.out.println(dockerService.getFrom(shell.getContainerName(), "/cert.pem", destination.toString()));
