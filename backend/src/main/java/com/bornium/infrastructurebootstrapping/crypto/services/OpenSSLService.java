@@ -1,10 +1,10 @@
 package com.bornium.infrastructurebootstrapping.crypto.services;
 
+import com.bornium.infrastructurebootstrapping.base.services.execution.docker.ContainerShell;
+import com.bornium.infrastructurebootstrapping.base.services.execution.docker.DockerService;
 import com.bornium.infrastructurebootstrapping.crypto.services.openssl.OpenSSLExtension;
 import com.bornium.infrastructurebootstrapping.crypto.services.openssl.SAN;
 import com.bornium.infrastructurebootstrapping.crypto.services.openssl.X509Subject;
-import com.bornium.infrastructurebootstrapping.services.execution.docker.ContainerShell;
-import com.bornium.infrastructurebootstrapping.services.execution.docker.DockerService;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
