@@ -6,32 +6,25 @@ import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.Phy
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
-@Entity
 public class Cloud extends Base {
 
-    @ElementCollection
-    private Map<String, Hypervisor> hypervisors = new HashMap<>();
+    private List<Hypervisor> hypervisors;
+    private List<PhysicalMachine> physicalMachines;
 
-    @ElementCollection
-    private Map<String, PhysicalMachine> machines = new HashMap<String, PhysicalMachine>();
+    public Cloud(String id, List<Hypervisor> hypervisors, List<PhysicalMachine> physicalMachines) {
+        super(id);
+        this.hypervisors = hypervisors;
+        this.physicalMachines = physicalMachines;
+    }
 
-
-    public Map<String, Hypervisor> getHypervisors() {
+    public List<Hypervisor> getHypervisors() {
         return hypervisors;
     }
 
-    public void setHypervisors(Map<String, Hypervisor> hypervisors) {
-        this.hypervisors = hypervisors;
-    }
-
-    public Map<String, PhysicalMachine> getMachines() {
-        return machines;
-    }
-
-    public void setMachines(Map<String, PhysicalMachine> machines) {
-        this.machines = machines;
+    public List<PhysicalMachine> getPhysicalMachines() {
+        return physicalMachines;
     }
 }

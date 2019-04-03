@@ -1,5 +1,6 @@
 package com.bornium.infrastructurebootstrapping.base.access;
 
+import com.bornium.infrastructurebootstrapping.provisioning.entities.credentials.Credentials;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.user.User;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
@@ -15,17 +16,19 @@ public class Ssh {
     public static final int SSH_TIMEOUT = 30000;
     private String host;
     private int port;
-    private User user;
+    private String username;
+    private Credentials credentials;
     private OutputStream output;
     private OutputStream error;
     private JSch jsch;
     private Session session;
 
 
-    public Ssh(String host, int port, User user) {
+    public Ssh(String host, int port, String username, Credentials credentials) {
         this.host = host;
         this.port = port;
-        this.user = user;
+        this.username = username;
+        this.credentials = credentials;
 
         //input = System.in
         output = System.out;
@@ -35,8 +38,8 @@ public class Ssh {
     public void connect() {
         try {
             jsch = new JSch();
-            session = jsch.getSession(user.getName(), host, port);
-            user.getAuthentication().applyTo(this);
+            session = jsch.getSession(username, host, port);
+            credentials.applyTo(this);
 
             // TODO remove
             session.setConfig("StrictHostKeyChecking", "no");
@@ -150,14 +153,6 @@ public class Ssh {
         this.port = port;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
     public OutputStream getOutput() {
         return output;
     }
@@ -190,4 +185,19 @@ public class Ssh {
         this.session = session;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public Credentials getCredentials() {
+        return credentials;
+    }
+
+    public void setCredentials(Credentials credentials) {
+        this.credentials = credentials;
+    }
 }

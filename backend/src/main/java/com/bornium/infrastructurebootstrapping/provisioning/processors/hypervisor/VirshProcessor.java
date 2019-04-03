@@ -7,8 +7,6 @@ import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.UUID;
-import java.util.regex.Pattern;
 
 public class VirshProcessor extends HypervisorProcessor<Virsh> {
 
@@ -19,7 +17,7 @@ public class VirshProcessor extends HypervisorProcessor<Virsh> {
     @Override
     protected void installVm(VirtualMachine vm) throws Exception {
         ssh.execSudoPrint("mkdir -p " + vmPath(vm) + "/helper");
-        vm.getOperatingSystem().createInstallHelperFiles(this, vm);
+        //vm.getOperatingSystem().createInstallHelperFiles(this, vm);
 
         ssh.execSudoPrint("mkisofs -o " + vmPath(vm) + "/helper.iso " + vmPath(vm) + "/helper");
 
@@ -33,47 +31,50 @@ public class VirshProcessor extends HypervisorProcessor<Virsh> {
         Thread.sleep(60000);
 
         Vnc vnc = new Vnc(hypervisor.getHost());
-        vnc.exec(vm.getOperatingSystem().getVncCommandForInstallAndShutdown(vm, "/dev/sr1"));
+        //vnc.exec(vm.getOperatingSystem().getVncCommandForInstallAndShutdown(vm, "/dev/sr1"));
         vnc.close();
 
         System.out.println("Waiting for install");
         while (true) {
-            String vmState = ssh.execSudo("virsh domstate " + vm.getBaseId().getId());
+            String vmState = ssh.execSudo("virsh domstate " + vm.getId());
             Thread.sleep(1000);
             if (vmState.contains("shut off"))
                 break;
         }
         System.out.println("Install done");
 
-        ssh.execSudoPrint("virsh start " + vm.getBaseId().getId());
+        ssh.execSudoPrint("virsh start " + vm.getId());
     }
 
 
     private String createVmXml(VirtualMachine vm) throws IOException {
         String xml = StreamUtils.copyToString(this.getClass().getResourceAsStream("/hypervisor/virsh/vm-template.xml"), Charset.defaultCharset());
 
-        xml = xml
-                .replaceAll(Pattern.quote("${name}"), vm.getBaseId().getId())
+        /*xml = xml
+                .replaceAll(Pattern.quote("${name}"), vm.getId().getId())
                 .replaceAll(Pattern.quote("${uuid}"), UUID.randomUUID().toString())
-                .replaceAll(Pattern.quote("${memory}"), String.valueOf(vm.getRam().bytes()))
-                .replaceAll(Pattern.quote("${cpus}"), String.valueOf(vm.getCpus()))
-                .replaceAll(Pattern.quote("${baseimg}"), "/home/" + hypervisor.getUser().getName() + "/" + baseImagePath(vm))
-                .replaceAll(Pattern.quote("${bootimg}"), "/home/" + hypervisor.getUser().getName() + "/" + getImagePath(vm))
-                .replaceAll(Pattern.quote("${helperimg}"), "/home/" + hypervisor.getUser().getName() + "/" + vmPath(vm) + "/helper.iso")
+                .replaceAll(Pattern.quote("${memory}"), String.valueOf(vm.getMachineSpec().getRam().bytes()))
+                .replaceAll(Pattern.quote("${cpus}"), String.valueOf(vm.getMachineSpec().getCpus()))
+                .replaceAll(Pattern.quote("${baseimg}"), "/home/" + hypervisor.getUsername() + "/" + baseImagePath(vm))
+                .replaceAll(Pattern.quote("${bootimg}"), "/home/" + hypervisor.getUsername() + "/" + getImagePath(vm))
+                .replaceAll(Pattern.quote("${helperimg}"), "/home/" + hypervisor.getUsername() + "/" + vmPath(vm) + "/helper.iso")
                 .replaceAll(Pattern.quote("${mac}"), vm.getMac())
-                .replace("\"", "\\\"");
+                .replace("\"", "\\\"");*/
         return xml;
     }
 
     @Override
-    void createDisk(VirtualMachine vm) {
-        ssh.execSudoPrint("qemu-img create -f qcow2 " + baseImagePath(vm) + " " + vm.getDisk().getSize().bytes() + "B");
+    void createDisks(VirtualMachine vm) {
+        /*vm.getMachineSpec().getDisks().forEach(disk -> {
+            ssh.execSudoPrint("qemu-img create -f qcow2 " + baseImagePath(vm) + " " + disk.getSize().bytes() + "B");
+        });*/
+
     }
 
     @Override
     public void delete(VirtualMachine vm) {
-        ssh.execSudoPrint("virsh destroy " + vm.getBaseId().getId());
-        ssh.execSudoPrint("virsh undefine " + vm.getBaseId().getId());
+        ssh.execSudoPrint("virsh destroy " + vm.getId());
+        ssh.execSudoPrint("virsh undefine " + vm.getId());
         ssh.execSudoPrint("rm -r " + vmPath(vm));
     }
 

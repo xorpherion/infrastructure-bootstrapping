@@ -1,11 +1,14 @@
 package com.bornium.infrastructurebootstrapping.base.services.execution;
 
+import org.springframework.stereotype.Service;
+
 import java.io.IOException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Service
 public class CommandRunner {
 
     final Supplier<String> cmdRunner;

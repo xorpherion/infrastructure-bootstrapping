@@ -28,12 +28,12 @@ public class CloudCommands {
     }
 
     public Cloud create(Cloud cloud) {
-        cloud.getHypervisors().values().stream().forEach(hypervisor -> HypervisorProcessor.createVMs(hypervisor));
+        cloud.getHypervisors().stream().forEach(hypervisor -> HypervisorProcessor.createVMs(hypervisor));
         return cloud;
     }
 
     public Cloud delete(Cloud cloud) {
-        cloud.getHypervisors().values().stream().forEach(hypervisor -> HypervisorProcessor.deleteVMs(hypervisor));
+        cloud.getHypervisors().stream().forEach(hypervisor -> HypervisorProcessor.deleteVMs(hypervisor));
         return cloud;
     }
 }

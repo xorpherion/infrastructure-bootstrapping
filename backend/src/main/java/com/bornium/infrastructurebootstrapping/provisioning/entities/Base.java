@@ -1,71 +1,32 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities;
 
+
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import io.swagger.annotations.ApiModelProperty;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.persistence.*;
-import java.sql.Timestamp;
-import java.time.ZonedDateTime;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @MappedSuperclass
 public abstract class Base {
-    @JsonUnwrapped
-    @EmbeddedId
+
+    @JsonIgnore
+    @Id
     private BaseId baseId;
 
-    @JsonIgnore
-    @ApiModelProperty(hidden = true)
-    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private Timestamp created;
-
-    @JsonIgnore
-    @ApiModelProperty(hidden = true)
-    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private Timestamp modified;
-
-    public Base() {
-        this.baseId = new BaseId();
-        this.baseId.setNamespace(Namespace.GLOBAL);
+    public Base(String id){
+        this(new BaseId(id,Namespace.GLOBAL));
     }
 
     public Base(BaseId baseId) {
         this.baseId = baseId;
     }
 
-    @PrePersist
-    public void prePersist() {
-        Timestamp ts = Timestamp.from(ZonedDateTime.now().toInstant());
-        created = ts;
-        modified = ts;
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        modified = Timestamp.from(ZonedDateTime.now().toInstant());
-    }
-
-    public BaseId getBaseId() {
-        return baseId;
-    }
-
-    public void setBaseId(BaseId baseId) {
-        this.baseId = baseId;
-    }
-
-    public Timestamp getCreated() {
-        return created;
-    }
-
-    public void setCreated(Timestamp created) {
-        this.created = created;
-    }
-
-    public Timestamp getModified() {
-        return modified;
-    }
-
-    public void setModified(Timestamp modified) {
-        this.modified = modified;
+    @JsonGetter
+    public String getId() {
+        return baseId.getId();
     }
 }

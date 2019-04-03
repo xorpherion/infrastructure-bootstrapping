@@ -4,27 +4,15 @@ import com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsy
 
 import javax.persistence.Entity;
 
-@Entity
 public class VirtualMachine extends Machine {
 
-    public VirtualMachine() {
-    }
-
-    public VirtualMachine(String id, OperatingSystem operatingSystem, Disk disk, Memory ram, int cpus, String mac, String ip) {
-        super(id, "virtual", operatingSystem, disk, ram, cpus, mac, ip);
+    public VirtualMachine(String id, String operatingSystem, String machineSpec, String mac, String ip) {
+        super(id, "virtual", operatingSystem, machineSpec, mac, ip);
     }
 
     private boolean managed = true;
 
-    public boolean getManaged() {
-        return managed;
-    }
-
     public boolean isManaged() {
         return managed;
-    }
-
-    public void setManaged(boolean managed) {
-        this.managed = managed;
     }
 }

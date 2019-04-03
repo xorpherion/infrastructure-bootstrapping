@@ -1,5 +1,7 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
@@ -9,9 +11,6 @@ public class BaseId implements Serializable {
 
     private String id;
     private String namespace;
-
-    public BaseId() {
-    }
 
     public BaseId(String id, String namespace) {
         this.id = id;
@@ -26,10 +25,12 @@ public class BaseId implements Serializable {
         this.id = id;
     }
 
+    @JsonIgnore
     public String getNamespace() {
         return namespace;
     }
 
+    @JsonIgnore
     public void setNamespace(String namespace) {
         this.namespace = namespace;
     }

@@ -11,23 +11,23 @@ public abstract class HypervisorProcessor<T extends Hypervisor> {
 
     public HypervisorProcessor(T hypervisor) {
         this.hypervisor = hypervisor;
-        ssh = new Ssh(hypervisor.getHost(), hypervisor.getPort(), hypervisor.getUser());
+        ssh = new Ssh(hypervisor.getHost(), hypervisor.getPort(), hypervisor.getUsername(), hypervisor.getLoginCredentials());
     }
 
     public static void createVMs(Hypervisor hypervisor) {
-        hypervisor.getMachines().values().stream().forEach(vm -> hypervisor.getProcessor().create(vm));
+        hypervisor.getVms().stream().forEach(vm -> hypervisor.getProcessor().create(vm));
     }
 
     public static void deleteVMs(Hypervisor hypervisor) {
-        hypervisor.getMachines().values().stream().forEach(vm -> hypervisor.getProcessor().delete(vm));
+        hypervisor.getVms().stream().forEach(vm -> hypervisor.getProcessor().delete(vm));
     }
 
     public void create(VirtualMachine vm) {
         try {
             delete(vm);
             createVMDirectory(vm);
-            createDisk(vm);
-            downloadImage(vm);
+            createDisks(vm);
+            //downloadImage(vm);
             installVm(vm);
         } catch (Exception e) {
             e.printStackTrace();
@@ -46,26 +46,26 @@ public abstract class HypervisorProcessor<T extends Hypervisor> {
         return getWorkdir() + "/images";
     }
 
-    public String getImagePath(VirtualMachine vm) {
+    /*public String getImagePath(VirtualMachine vm) {
         return getImages() + "/" + vm.getOperatingSystem().getImageName();
-    }
+    }*/
 
     protected abstract void installVm(VirtualMachine vm) throws Exception;
 
-    protected void downloadImage(VirtualMachine vm) {
+    /*protected void downloadImage(VirtualMachine vm) {
         String imgName = vm.getOperatingSystem().getDownloadLink();
 
-    }
+    }*/
 
     public void createVMDirectory(VirtualMachine vm) {
         ssh.execPrint("mkdir -p " + vmPath(vm));
     }
 
     public String vmPath(VirtualMachine vm) {
-        return getBase() + "/" + vm.getBaseId().getId();
+        return getBase() + "/" + vm.getId();
     }
 
-    abstract void createDisk(VirtualMachine vm);
+    abstract void createDisks(VirtualMachine vm);
 
     protected String baseImagePath(VirtualMachine vm) {
         return vmPath(vm) + "/base.img";

@@ -1,42 +1,32 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem;
 
+import com.bornium.infrastructurebootstrapping.provisioning.entities.Base;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.BaseId;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
 import com.bornium.infrastructurebootstrapping.provisioning.processors.hypervisor.HypervisorProcessor;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "type")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = ContainerLinux.class, name = "containerlinux"),
-})
-public abstract class OperatingSystem {
+public abstract class OperatingSystem extends Base {
 
-    String type;
+    String imageName;
+    String downloadLink;
 
-    public abstract String getImageName();
-
-    public abstract String getDownloadLink();
-
-    public OperatingSystem() {
-        this(null);
+    public OperatingSystem(String id, String imageName, String downloadLink) {
+        super(id);
+        this.imageName = imageName;
+        this.downloadLink = downloadLink;
     }
 
-    public OperatingSystem(String type) {
-        this.type = type;
+    public String getImageName() {
+        return imageName;
     }
 
-    public String getType() {
-        return type;
+    public String getDownloadLink() {
+        return downloadLink;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public abstract String getVncCommandForInstallAndShutdown(VirtualMachine vm, String helperInstallDevice);
+    public abstract String gitVncCommandForInstallAndShutdown(VirtualMachine vm, String helperInstallDevice);
 
     public abstract void createInstallHelperFiles(HypervisorProcessor processor, VirtualMachine vm) throws Exception;
 }

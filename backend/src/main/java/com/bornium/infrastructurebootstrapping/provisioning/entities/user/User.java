@@ -1,5 +1,7 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities.user;
 
+import com.bornium.infrastructurebootstrapping.provisioning.entities.credentials.Credentials;
+
 public class User {
     public User(String name, Authentication authentication) {
         this.name = name;
