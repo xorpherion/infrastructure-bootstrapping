@@ -7,6 +7,6 @@ import javax.persistence.Entity;
 public class PhysicalMachine extends Machine {
 
     public PhysicalMachine(String id, String operatingSystem, String mac, String ip){
-        super(id,"physical",operatingSystem,null,mac,ip);
+        super(id,operatingSystem,null,mac,ip);
     }
 }

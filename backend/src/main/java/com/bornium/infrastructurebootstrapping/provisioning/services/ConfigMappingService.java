@@ -16,16 +16,13 @@ import static com.bornium.infrastructurebootstrapping.base.util.ReflectionUtil.g
 import static java.util.Arrays.*;
 
 public class ConfigMappingService<T> {
-
-
-
     Map<String, T> mapper;
 
     public ConfigMappingService(Map<String,Object> config, ObjectMapper objectMapper, String name, Function<T,String> toName){
         Object obj = ((Map) config.get("config")).get(name);
         if(obj == null){
             mapper = new HashMap<>();
-            System.out.println("WARNING");
+            System.out.println("WARNING: "+this.getClass().getSimpleName()+" found no config called " + name);
             return;
         }
         T[] configAsObject = (T[]) objectMapper.convertValue(obj, Array.newInstance(getGenericTypeName(ConfigMappingService.class), 0).getClass());

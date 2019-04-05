@@ -3,7 +3,6 @@ package com.bornium.infrastructurebootstrapping.provisioning.entities.operatings
 import com.bornium.infrastructurebootstrapping.provisioning.entities.Base;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.BaseId;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
-import com.bornium.infrastructurebootstrapping.provisioning.processors.hypervisor.HypervisorProcessor;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -28,5 +27,5 @@ public abstract class OperatingSystem extends Base {
 
     public abstract String gitVncCommandForInstallAndShutdown(VirtualMachine vm, String helperInstallDevice);
 
-    public abstract void createInstallHelperFiles(HypervisorProcessor processor, VirtualMachine vm) throws Exception;
+    public abstract void createInstallHelperFiles(VirtualMachine vm) throws Exception;
 }

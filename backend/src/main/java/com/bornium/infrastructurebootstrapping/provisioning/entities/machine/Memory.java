@@ -2,16 +2,13 @@ package com.bornium.infrastructurebootstrapping.provisioning.entities.machine;
 
 public class Memory {
 
-    long tb;
-    long gb;
-    long mb;
-    long kb;
-    long b;
+    Long tb;
+    Long gb;
+    Long mb;
+    Long kb;
+    Long b;
 
-    public Memory() {
-    }
-
-    public Memory(long tb, long gb, long mb, long kb, long b) {
+    public Memory(Long tb, Long gb, Long mb, Long kb, Long b) {
         this.tb = tb;
         this.gb = gb;
         this.mb = mb;
@@ -19,12 +16,16 @@ public class Memory {
         this.b = b;
     }
 
+    private long unwrap(Long l){
+        return l != null? l.longValue() : 0;
+    }
+
     public long bytes() {
-        return b +
-                kb * 1024 +
-                mb * 1024 * 1024 +
-                gb * 1024 * 1024 * 1024 +
-                tb * 1024 * 1024 * 1024 * 1024;
+        return  unwrap(b) +
+                unwrap(kb) * 1024 +
+                unwrap(mb) * 1024 * 1024 +
+                unwrap(gb) * 1024 * 1024 * 1024 +
+                unwrap(tb) * 1024 * 1024 * 1024 * 1024;
     }
 
     public long kilobytes() {
@@ -43,43 +44,23 @@ public class Memory {
         return gigabytes() / 1024;
     }
 
-    public long getTb() {
+    public Long getTb() {
         return tb;
     }
 
-    public void setTb(long tb) {
-        this.tb = tb;
-    }
-
-    public long getGb() {
+    public Long getGb() {
         return gb;
     }
 
-    public void setGb(long gb) {
-        this.gb = gb;
-    }
-
-    public long getMb() {
+    public Long getMb() {
         return mb;
     }
 
-    public void setMb(long mb) {
-        this.mb = mb;
-    }
-
-    public long getKb() {
+    public Long getKb() {
         return kb;
     }
 
-    public void setKb(long kb) {
-        this.kb = kb;
-    }
-
-    public long getB() {
+    public Long getB() {
         return b;
-    }
-
-    public void setB(long b) {
-        this.b = b;
     }
 }

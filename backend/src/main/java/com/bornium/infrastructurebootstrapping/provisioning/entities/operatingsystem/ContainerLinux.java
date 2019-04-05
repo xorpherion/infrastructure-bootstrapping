@@ -1,7 +1,6 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem;
 
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
-import com.bornium.infrastructurebootstrapping.provisioning.processors.hypervisor.HypervisorProcessor;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import org.springframework.util.StreamUtils;
 
@@ -25,10 +24,10 @@ public class ContainerLinux extends OperatingSystem {
     }
 
     @Override
-    public void createInstallHelperFiles(HypervisorProcessor processor, VirtualMachine vm) throws Exception {
-        processor.getSsh().execSudoPrint("touch " + processor.vmPath(vm) + "/helper/ignition");
+    public void createInstallHelperFiles(VirtualMachine vm) throws Exception {
+        /*processor.getSsh().execSudoPrint("touch " + processor.vmPath(vm) + "/helper/ignition");
         processor.getSsh().execSudoPrint("bash -c 'echo \"" + createIgnitionFile(vm) + "\" > " + processor.vmPath(vm) + "/helper/ignition'");
-        processor.getSsh().execSudoPrint("cp ib/images/" + getImageName() + " " + processor.vmPath(vm) + "/helper/install");
+        processor.getSsh().execSudoPrint("cp ib/images/" + getImageName() + " " + processor.vmPath(vm) + "/helper/install");*/
     }
 
     private String createIgnitionFile(VirtualMachine vm) throws IOException {

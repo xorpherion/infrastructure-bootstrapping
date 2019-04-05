@@ -9,14 +9,12 @@ public abstract class Machine extends Base {
 
     private String machineSpec;
     private String ip;
-    String type;
     String operatingSystem;
     String mac;
 
-    public Machine(String id, String type, String operatingSystem, String machineSpec, String mac, String ip) {
+    public Machine(String id, String operatingSystem, String machineSpec, String mac, String ip) {
         super(id);
         this.machineSpec = machineSpec;
-        this.type = type;
         this.operatingSystem = operatingSystem;
         this.mac = mac;
         this.ip = ip;
@@ -28,10 +26,6 @@ public abstract class Machine extends Base {
 
     public String getIp() {
         return ip;
-    }
-
-    public String getType() {
-        return type;
     }
 
     public String getOperatingSystem() {

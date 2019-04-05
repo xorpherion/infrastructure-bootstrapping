@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-//@Service
-//public class CredentialsService extends ConfigMappingService<PlaintextPasswordCredentials> {
-//
-//    public CredentialsService(@Qualifier("config") Map<String, Object> config, ObjectMapper objectMapper) {
-//        super(config, objectMapper, "plaintextPassword", pp -> pp.getId().getId());
-//    }
-//}
+@Service
+public class CredentialsService extends ConfigMappingService<Credentials> {
+
+    public CredentialsService(@Qualifier("config") Map<String, Object> config, ObjectMapper objectMapper) {
+        super(config, objectMapper, "credentials", pp -> pp.getId());
+    }
+}

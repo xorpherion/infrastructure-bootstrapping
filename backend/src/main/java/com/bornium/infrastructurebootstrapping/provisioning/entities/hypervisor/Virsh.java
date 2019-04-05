@@ -1,28 +1,24 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities.hypervisor;
 
 import com.bornium.infrastructurebootstrapping.provisioning.entities.credentials.Credentials;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.user.User;
-import com.bornium.infrastructurebootstrapping.provisioning.processors.hypervisor.HypervisorProcessor;
-import com.bornium.infrastructurebootstrapping.provisioning.processors.hypervisor.VirshProcessor;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.Entity;
+import java.util.List;
 
 public class Virsh extends Hypervisor {
 
-    public Virsh() {
-        this(null, null,null, null, null);
+    public Virsh(String id, String host, Integer port, String username, String loginCredentials, List<VirtualMachine> vms) {
+        super(id, host, port, username, loginCredentials, "virsh",vms);
     }
 
-    public Virsh(String host, Integer port, String username, Credentials loginCredentials, String id) {
-        super(host, port, username, loginCredentials, id, "virsh");
-    }
-
-    @JsonIgnore
-    @Override
-    public HypervisorProcessor getProcessor() {
-        return new VirshProcessor(this);
-    }
+//    @JsonIgnore
+//    @Override
+//    public HypervisorProcessor getProcessor() {
+//        return new VirshProcessor(this);
+//    }
 
 
 }

@@ -1,6 +1,7 @@
 package com.bornium.infrastructurebootstrapping;
 
 import com.bornium.infrastructurebootstrapping.provisioning.entities.cloud.Cloud;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.credentials.Credentials;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.MachineSpec;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem.OperatingSystem;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,16 +15,17 @@ public class Config {
 
     List<MachineSpec> machineSpecs;
     List<OperatingSystem> operatingSystems;
-
+    List<Credentials> credentials;
     List<Cloud> clouds;
 
     /*public Config(Map<String,Object> configMap) {
         machineSpecs = ((List<Map>) configMap.get("machineSpecs")).stream().map(tRaw -> Util.mapper().convertValue(tRaw,MachineSpec.class)).collect(Collectors.toList());
     }*/
 
-    public Config(List<MachineSpec> machineSpecs, List<OperatingSystem> operatingSystems, List<Cloud> clouds) {
+    public Config(List<MachineSpec> machineSpecs, List<OperatingSystem> operatingSystems, List<Credentials> credentials , List<Cloud> clouds) {
         this.machineSpecs = machineSpecs;
         this.operatingSystems = operatingSystems;
+        this.credentials = credentials;
         this.clouds = clouds;
     }
 
@@ -37,5 +39,9 @@ public class Config {
 
     public List<OperatingSystem> getOperatingSystems() {
         return operatingSystems;
+    }
+
+    public List<Credentials> getCredentials() {
+        return credentials;
     }
 }

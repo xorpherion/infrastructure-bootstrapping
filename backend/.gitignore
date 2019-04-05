@@ -3,3 +3,6 @@
 out
 /src/main/resources/application-dev.properties
 /temp
+
+config.json
+src/test/java/com/bornium/infrastructurebootstrapping/DevMethods.java
