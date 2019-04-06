@@ -17,7 +17,7 @@
 //    @Override
 //    protected void installVm(VirtualMachine vm) throws Exception {
 //        ssh.execSudoPrint("mkdir -p " + vmPath(vm) + "/helper");
-//        //vm.getOperatingSystem().createInstallHelperFiles(this, vm);
+//        vm.getOperatingSystem().createInstallHelperFiles(this, vm);
 //
 //        ssh.execSudoPrint("mkisofs -o " + vmPath(vm) + "/helper.iso " + vmPath(vm) + "/helper");
 //
@@ -50,7 +50,7 @@
 //    private String createVmXml(VirtualMachine vm) throws IOException {
 //        String xml = StreamUtils.copyToString(this.getClass().getResourceAsStream("/hypervisor/virsh/vm-template.xml"), Charset.defaultCharset());
 //
-//        /*xml = xml
+//        xml = xml
 //                .replaceAll(Pattern.quote("${name}"), vm.getId().getId())
 //                .replaceAll(Pattern.quote("${uuid}"), UUID.randomUUID().toString())
 //                .replaceAll(Pattern.quote("${memory}"), String.valueOf(vm.getMachineSpec().getRam().bytes()))
@@ -59,15 +59,15 @@
 //                .replaceAll(Pattern.quote("${bootimg}"), "/home/" + hypervisor.getUsername() + "/" + getImagePath(vm))
 //                .replaceAll(Pattern.quote("${helperimg}"), "/home/" + hypervisor.getUsername() + "/" + vmPath(vm) + "/helper.iso")
 //                .replaceAll(Pattern.quote("${mac}"), vm.getMac())
-//                .replace("\"", "\\\"");*/
+//                .replace("\"", "\\\"");
 //        return xml;
 //    }
 //
 //    @Override
 //    void createDisks(VirtualMachine vm) {
-//        /*vm.getMachineSpec().getDisks().forEach(disk -> {
+//        vm.getMachineSpec().getDisks().forEach(disk -> {
 //            ssh.execSudoPrint("qemu-img create -f qcow2 " + baseImagePath(vm) + " " + disk.getSize().bytes() + "B");
-//        });*/
+//        });
 //
 //    }
 //

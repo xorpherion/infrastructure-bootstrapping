@@ -1,7 +1,11 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities.hypervisor;
 
+import com.bornium.infrastructurebootstrapping.provisioning.ProvisioningTask;
+import com.bornium.infrastructurebootstrapping.provisioning.VirshProvisioningTask;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.credentials.Credentials;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.MachineSpec;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem.OperatingSystem;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -14,11 +18,8 @@ public class Virsh extends Hypervisor {
         super(id, host, port, username, loginCredentials, "virsh",vms);
     }
 
-//    @JsonIgnore
-//    @Override
-//    public HypervisorProcessor getProcessor() {
-//        return new VirshProcessor(this);
-//    }
-
-
+    @Override
+    public ProvisioningTask createTask(Credentials loginCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec) {
+        return new VirshProvisioningTask(this,loginCredentials,virtualMachine,operatingSystem,machineSpec);
+    }
 }

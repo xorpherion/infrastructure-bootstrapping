@@ -1,8 +1,11 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities.hypervisor;
 
+import com.bornium.infrastructurebootstrapping.provisioning.ProvisioningTask;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.Base;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.credentials.Credentials;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.MachineSpec;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem.OperatingSystem;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.user.User;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -32,8 +35,6 @@ public abstract class Hypervisor extends Base {
         this.vms = vms;
     }
 
-    //public abstract HypervisorProcessor getProcessor();
-
     public String getHost() {
         return host;
     }
@@ -57,4 +58,6 @@ public abstract class Hypervisor extends Base {
     public List<VirtualMachine> getVms() {
         return vms;
     }
+
+    public abstract ProvisioningTask createTask(Credentials loginCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec);
 }

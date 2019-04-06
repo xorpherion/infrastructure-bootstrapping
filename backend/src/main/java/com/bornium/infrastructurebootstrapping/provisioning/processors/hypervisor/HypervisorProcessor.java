@@ -14,20 +14,12 @@
 //        ssh = new Ssh(hypervisor.getHost(), hypervisor.getPort(), hypervisor.getUsername(), hypervisor.getLoginCredentials());
 //    }
 //
-//    public static void createVMs(Hypervisor hypervisor) {
-//        hypervisor.getVms().stream().forEach(vm -> hypervisor.getProcessor().create(vm));
-//    }
-//
-//    public static void deleteVMs(Hypervisor hypervisor) {
-//        hypervisor.getVms().stream().forEach(vm -> hypervisor.getProcessor().delete(vm));
-//    }
-//
 //    public void create(VirtualMachine vm) {
 //        try {
 //            delete(vm);
 //            createVMDirectory(vm);
 //            createDisks(vm);
-//            //downloadImage(vm);
+//            downloadImage(vm);
 //            installVm(vm);
 //        } catch (Exception e) {
 //            e.printStackTrace();
@@ -46,16 +38,16 @@
 //        return getWorkdir() + "/images";
 //    }
 //
-//    /*public String getImagePath(VirtualMachine vm) {
+//    public String getImagePath(VirtualMachine vm) {
 //        return getImages() + "/" + vm.getOperatingSystem().getImageName();
-//    }*/
+//    }
 //
 //    protected abstract void installVm(VirtualMachine vm) throws Exception;
 //
-//    /*protected void downloadImage(VirtualMachine vm) {
+//    protected void downloadImage(VirtualMachine vm) {
 //        String imgName = vm.getOperatingSystem().getDownloadLink();
 //
-//    }*/
+//    }
 //
 //    public void createVMDirectory(VirtualMachine vm) {
 //        ssh.execPrint("mkdir -p " + vmPath(vm));

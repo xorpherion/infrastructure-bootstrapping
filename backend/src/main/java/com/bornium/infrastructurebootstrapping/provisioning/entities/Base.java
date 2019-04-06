@@ -1,15 +1,13 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities;
 
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder(value = {"id"}, alphabetic = true)
 @MappedSuperclass
 public abstract class Base {
 
