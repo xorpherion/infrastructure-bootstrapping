@@ -1,5 +1,7 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem;
 
+import com.bornium.infrastructurebootstrapping.base.access.Ssh;
+import com.bornium.infrastructurebootstrapping.provisioning.ProvisioningTask;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import org.springframework.util.StreamUtils;
@@ -19,15 +21,15 @@ public class ContainerLinux extends OperatingSystem {
     }
 
     @Override
-    public String gitVncCommandForInstallAndShutdown(VirtualMachine vm, String helperInstallDevice) {
+    public String getVncCommandForInstallAndShutdown(ProvisioningTask task, String helperInstallDevice) {
         return "sudo mount " + helperInstallDevice + " /mnt;sudo coreos-install -d /dev/sda -i /mnt/ignition;sudo shutdown now";
     }
 
     @Override
-    public void createInstallHelperFiles(VirtualMachine vm) throws Exception {
-        /*processor.getSsh().execSudoPrint("touch " + processor.vmPath(vm) + "/helper/ignition");
-        processor.getSsh().execSudoPrint("bash -c 'echo \"" + createIgnitionFile(vm) + "\" > " + processor.vmPath(vm) + "/helper/ignition'");
-        processor.getSsh().execSudoPrint("cp ib/images/" + getImageName() + " " + processor.vmPath(vm) + "/helper/install");*/
+    public void createInstallHelperFiles(ProvisioningTask task) throws Exception {
+        task.getSsh().execSudoPrint("touch " + Ssh.quote(task.vmPath() + "/helper/ignition"));
+        task.getSsh().execSudoPrint("bash -c 'echo \"" + createIgnitionFile(task.getVirtualMachine()) + "\" > " + Ssh.dquote(task.vmPath() + "/helper/ignition")+"'");
+        task.getSsh().execSudoPrint("cp " + Ssh.quote("ib/images/" + getImageName()) + " " + Ssh.quote(task.vmPath() + "/helper/install"));
     }
 
     private String createIgnitionFile(VirtualMachine vm) throws IOException {

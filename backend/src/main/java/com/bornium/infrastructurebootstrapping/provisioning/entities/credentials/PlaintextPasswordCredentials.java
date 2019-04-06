@@ -5,7 +5,7 @@ import com.bornium.infrastructurebootstrapping.base.access.Ssh;
 public class PlaintextPasswordCredentials extends Credentials {
     public PlaintextPasswordCredentials(String id, String password) {
         super(id);
-        this.password = unwrapEnv(password);
+        this.password = password;
     }
 
     private String unwrapEnv(String password) {
@@ -17,11 +17,15 @@ public class PlaintextPasswordCredentials extends Credentials {
 
     @Override
     public void applyTo(Ssh ssh) {
-        ssh.getSession().setPassword(password);
+        ssh.getSession().setPassword(unwrapPassword());
     }
 
     public final String getPassword() {
         return password;
+    }
+
+    public final String unwrapPassword(){
+        return unwrapEnv(getPassword());
     }
 
     private final String password;

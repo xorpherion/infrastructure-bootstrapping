@@ -28,7 +28,13 @@ public class ProvisioningService {
     }
 
     public void recreate(Cloud cloud){
-        cloudToTasks(cloud).forEach(task -> task.recreateVm());
+        cloudToTasks(cloud).forEach(task -> {
+            try {
+                task.recreateVm();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     private List<ProvisioningTask> cloudToTasks(Cloud cloud) {

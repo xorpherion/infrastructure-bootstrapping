@@ -137,6 +137,14 @@ public class Ssh {
         session.disconnect();
     }
 
+    public static String quote(String str){
+        return "'" + str+ "'";
+    }
+
+    public static String dquote(String str){
+        return "\"" + str+ "\"";
+    }
+
     public String getHost() {
         return host;
     }

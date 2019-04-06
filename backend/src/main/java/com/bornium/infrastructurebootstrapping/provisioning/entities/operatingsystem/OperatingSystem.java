@@ -1,5 +1,6 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem;
 
+import com.bornium.infrastructurebootstrapping.provisioning.ProvisioningTask;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.Base;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.BaseId;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
@@ -25,7 +26,7 @@ public abstract class OperatingSystem extends Base {
         return downloadLink;
     }
 
-    public abstract String gitVncCommandForInstallAndShutdown(VirtualMachine vm, String helperInstallDevice);
+    public abstract String getVncCommandForInstallAndShutdown(ProvisioningTask task, String helperInstallDevice);
 
-    public abstract void createInstallHelperFiles(VirtualMachine vm) throws Exception;
+    public abstract void createInstallHelperFiles(ProvisioningTask task) throws Exception;
 }
