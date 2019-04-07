@@ -9,10 +9,22 @@ import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.Vir
 import com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem.OperatingSystem;
 import org.springframework.util.StreamUtils;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 public class VirshProvisioningTask extends ProvisioningTask {
 
@@ -33,11 +45,86 @@ public class VirshProvisioningTask extends ProvisioningTask {
         getSsh().execSudoPrint("virsh autostart " +Ssh.quote(getVirtualMachine().getId()));
         getSsh().execSudoPrint("virsh start " + Ssh.quote(getVirtualMachine().getId()));
 
-        System.out.println("Waiting 60 seconds for vm startup");
-        //TODO actually look at the images received to see if terminal is ready instead of waiting 60 secs
-        Thread.sleep(60000);
+        System.out.println("Waiting for vm startup");
 
-        Vnc vnc = new Vnc(getHypervisor().getHost());
+        CountDownLatch cdl = new CountDownLatch(1);
+
+        Vnc vnc = new Vnc(getHypervisor().getHost(), new Consumer<Image>() {
+
+            int counter = -1;
+            final int numImages = 5;
+            BufferedImage[] lastImages = new BufferedImage[numImages];
+            long[] lastDiffs = new long[numImages];
+            long lastAcc = 0;
+            int accsSet = 0;
+            boolean done = false;
+
+            @Override
+            public void accept(Image vncImage) {
+                if(done)
+                    return;
+                counter++;
+                BufferedImage orig = (BufferedImage) vncImage;
+                BufferedImage bwImage = new BufferedImage(orig.getWidth(),orig.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+                Graphics2D graphic = bwImage.createGraphics();
+                graphic.drawImage(vncImage, 0, 0, Color.WHITE, null);
+                graphic.dispose();
+
+                lastImages[counter%numImages] = bwImage;
+
+                if(counter < numImages)
+                    return;
+
+                int[] changeImage = new int[((DataBufferByte)bwImage.getRaster().getDataBuffer()).getData().length];
+
+                Stream.of(lastImages).forEach(image -> {
+                    byte[] imgData = ((DataBufferByte)image.getRaster().getDataBuffer()).getData();
+                    for(int i = 0; i < imgData.length; i++)
+                        changeImage[i] += imgData[i];
+                });
+
+                byte[] finalData = new byte[((DataBufferByte)bwImage.getRaster().getDataBuffer()).getData().length];
+                for(int i = 0; i < changeImage.length; i++)
+                    finalData[i] = (byte)(changeImage[i] / 5);
+
+                long acc = 0;
+
+                for(int i = 0; i < finalData.length; i++)
+                    acc += finalData[i];
+
+                lastDiffs[counter%numImages] = lastAcc - acc;
+                lastAcc = acc;
+                accsSet++;
+
+                if(accsSet < 5)
+                    return;
+
+                if(!(LongStream.of(lastDiffs).map(operand -> Math.abs(operand)).sum() < 5000))
+                    return;
+
+                cdl.countDown();
+                done = true;
+
+                /*
+                //dev only
+                temporarilyWriteToFile(finalImage,finalData);
+                */
+            }
+
+            private void temporarilyWriteToFile(BufferedImage bwImage, byte[] finalData) throws IOException {
+                BufferedImage finalImage = new BufferedImage(bwImage.getWidth(),bwImage.getHeight(),BufferedImage.TYPE_BYTE_GRAY);
+                final byte[] a = ( (DataBufferByte) finalImage.getRaster().getDataBuffer() ).getData();
+                System.arraycopy(finalData, 0, a, 0, finalData.length);
+
+                Path path = Paths.get("tempImages/");
+                if(!path.toFile().exists())
+                    Files.createDirectories(path);
+                ImageIO.write(bwImage,"jpg",new File("tempImages/image" + counter + ".jpg"));
+            }
+        });
+
+        cdl.await();
+
         vnc.exec(getOperatingSystem().getVncCommandForInstallAndShutdown(this, "/dev/sr1"));
         vnc.close();
 

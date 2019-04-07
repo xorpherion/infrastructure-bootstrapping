@@ -3,6 +3,9 @@ package com.bornium.infrastructurebootstrapping.base.access;
 import com.shinyhut.vernacular.client.VernacularClient;
 import com.shinyhut.vernacular.client.VernacularConfig;
 
+import java.awt.*;
+import java.util.function.Consumer;
+
 public class Vnc {
 
     public static final int SHIFT = 0xffe1;
@@ -12,13 +15,20 @@ public class Vnc {
     private final int port;
 
     public Vnc(String host) {
-        this(host, 5900);
+        this(host, 5900,null);
     }
 
-    public Vnc(String host, int port) {
+    public Vnc(String host,Consumer<Image> screenListener) {
+        this(host, 5900,screenListener);
+    }
+
+    public Vnc(String host, int port, Consumer<Image> screenListener) {
         this.host = host;
         this.port = port;
         cfg = new VernacularConfig();
+        cfg.setTargetFramesPerSecond(1);
+        if(screenListener != null)
+            cfg.setScreenUpdateListener(screenListener);
         client = new VernacularClient(cfg);
         client.start(host, port);
     }
