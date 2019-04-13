@@ -7,6 +7,8 @@ import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.Mac
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem.OperatingSystem;
 
+import java.util.stream.Stream;
+
 public abstract class ProvisioningTask {
     private final Hypervisor hypervisor;
     private final VirtualMachine virtualMachine;
@@ -28,7 +30,27 @@ public abstract class ProvisioningTask {
         createVMDirectory();
         createDisks();
         downloadImage();
-        installVm();
+        installVmAndReboot();
+        waitUntilVmBoot();
+        postProcessVm();
+    }
+
+    protected abstract void postProcessVm();
+
+    private void waitUntilVmBoot() throws InterruptedException {
+        System.out.println("Waiting for VM to start up");
+        int counter = 0;
+        while(true){
+            getSsh().disconnect();
+            String res = getSsh().exec("ls");
+            if(Stream.of(res.split("\n")).filter(str -> str.contains("exit-status:")).findFirst().get().contains("0"))
+                break;
+            counter++;
+            if(counter >= 300)
+                throw new RuntimeException("could not connect to newly created vm with name: " + virtualMachine.getId());
+            Thread.sleep(1000);
+        }
+        System.out.println("VM started up");
     }
 
     public void deleteVm() throws Exception{
@@ -40,7 +62,7 @@ public abstract class ProvisioningTask {
         createVm();
     }
 
-    protected abstract void installVm() throws Exception;
+    protected abstract void installVmAndReboot() throws Exception;
 
     protected abstract void createDisks() throws Exception;
 
@@ -59,7 +81,7 @@ public abstract class ProvisioningTask {
     }
 
     public String getImagePath() {
-        return getImages() + "/" + operatingSystem.getImageName();
+        return getImages() + "/" + operatingSystem.getInstallImage();
     }
 
     protected void downloadImage() {

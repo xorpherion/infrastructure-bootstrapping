@@ -2,31 +2,33 @@ package com.bornium.infrastructurebootstrapping.provisioning.entities.operatings
 
 import com.bornium.infrastructurebootstrapping.provisioning.ProvisioningTask;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.Base;
-import com.bornium.infrastructurebootstrapping.provisioning.entities.BaseId;
-import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 public abstract class OperatingSystem extends Base {
 
-    String imageName;
+    String installImage;
+    String bootImage;
     String downloadLink;
 
-    public OperatingSystem(String id, String imageName, String downloadLink) {
+    public OperatingSystem(String id, String installImage, String bootImage, String downloadLink) {
         super(id);
-        this.imageName = imageName;
+        this.installImage = installImage;
+        this.bootImage = bootImage;
         this.downloadLink = downloadLink;
     }
 
-    public String getImageName() {
-        return imageName;
+    public String getInstallImage() {
+        return installImage;
     }
 
     public String getDownloadLink() {
         return downloadLink;
     }
 
-    public abstract String getVncCommandForInstallAndShutdown(ProvisioningTask task, String helperInstallDevice);
+    public String getBootImage() {
+        return bootImage;
+    }
+
+    public abstract String getVncCommandForInstallAndShutdown(ProvisioningTask task);
 
     public abstract void createInstallHelperFiles(ProvisioningTask task) throws Exception;
 }

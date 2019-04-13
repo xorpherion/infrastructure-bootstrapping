@@ -19,6 +19,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
@@ -33,11 +34,18 @@ public class VirshProvisioningTask extends ProvisioningTask {
     }
 
     @Override
-    protected void installVm()  throws Exception{
-        getSsh().execSudoPrint("mkdir -p " + Ssh.quote(vmPath() + "/helper"));
+    protected void postProcessVm() {
+        Ssh vmSsh = null;
+        vmSsh.execSudoPrint("mkdir /ib/");
+        vmSsh.execSudoPrint("mount -t 9p -o rw,trans=virtio,version=9p2000.L mounted /ib/");
+    }
+
+    @Override
+    protected void installVmAndReboot()  throws Exception{
+        //getSsh().execSudoPrint("mkdir -p " + Ssh.quote(vmPath() + "/helper"));
         getOperatingSystem().createInstallHelperFiles(this);
 
-        getSsh().execSudoPrint("mkisofs -o " + Ssh.quote(vmPath() + "/helper.iso") +" " + Ssh.quote(vmPath() + "/helper"));
+        //getSsh().execSudoPrint("mkisofs -o " + Ssh.quote(vmPath() + "/helper.iso") +" " + Ssh.quote(vmPath() + "/helper"));
 
         getSsh().execSudoPrint("rm " + Ssh.quote(vmPath() + "/vm.xml"));
         getSsh().execSudoPrint("bash -c \"echo '" + createVmXml(getVirtualMachine()) + "' > " + Ssh.quote(vmPath() + "/vm.xml") + "\"");
@@ -45,11 +53,40 @@ public class VirshProvisioningTask extends ProvisioningTask {
         getSsh().execSudoPrint("virsh autostart " +Ssh.quote(getVirtualMachine().getId()));
         getSsh().execSudoPrint("virsh start " + Ssh.quote(getVirtualMachine().getId()));
 
+        String vncPortStr = getSsh().execSudoPrint("virsh vncdisplay " + Ssh.quote(getVirtualMachine().getId())).split(":")[1].substring(0,1);
+        int vncPort = Integer.parseInt(vncPortStr);
+
         System.out.println("Waiting for vm startup");
 
         CountDownLatch cdl = new CountDownLatch(1);
 
-        Vnc vnc = new Vnc(getHypervisor().getHost(), new Consumer<Image>() {
+        Vnc vnc = new Vnc(getHypervisor().getHost(), 5900 + vncPort, blockUntilImageStabilizes(cdl));
+
+        cdl.await();
+
+        vnc.exec("sudo mkdir /ib/");
+        vnc.exec("sudo mount -t 9p -o rw,trans=virtio,version=9p2000.L mounted /ib/");
+        vnc.close();
+
+        Vnc vnc1 = new Vnc(getHypervisor().getHost(),5900 + vncPort,null);
+
+        Arrays.asList(getOperatingSystem().getVncCommandForInstallAndShutdown(this)).forEach(cmd -> vnc1.exec(cmd));
+        vnc1.close();
+
+        System.out.println("Waiting for install");
+        while (true) {
+            String vmState = getSsh().execSudo("virsh domstate " + Ssh.quote(getVirtualMachine().getId()));
+            Thread.sleep(1000);
+            if (vmState.contains("shut off"))
+                break;
+        }
+        System.out.println("Install done");
+
+        getSsh().execSudoPrint("virsh start " + Ssh.quote(getVirtualMachine().getId()));
+    }
+
+    private Consumer<Image> blockUntilImageStabilizes(CountDownLatch cdl) {
+        return new Consumer<Image>() {
 
             int counter = -1;
             final int numImages = 5;
@@ -121,23 +158,7 @@ public class VirshProvisioningTask extends ProvisioningTask {
                     Files.createDirectories(path);
                 ImageIO.write(bwImage,"jpg",new File("tempImages/image" + counter + ".jpg"));
             }
-        });
-
-        cdl.await();
-
-        vnc.exec(getOperatingSystem().getVncCommandForInstallAndShutdown(this, "/dev/sr1"));
-        vnc.close();
-
-        System.out.println("Waiting for install");
-        while (true) {
-            String vmState = getSsh().execSudo("virsh domstate " + Ssh.quote(getVirtualMachine().getId()));
-            Thread.sleep(1000);
-            if (vmState.contains("shut off"))
-                break;
-        }
-        System.out.println("Install done");
-
-        getSsh().execSudoPrint("virsh start " + Ssh.quote(getVirtualMachine().getId()));
+        };
     }
 
     @Override
@@ -163,9 +184,10 @@ public class VirshProvisioningTask extends ProvisioningTask {
                 .replaceAll(Pattern.quote("${memory}"), String.valueOf(getMachineSpec().getRam().bytes()))
                 .replaceAll(Pattern.quote("${cpus}"), String.valueOf(getMachineSpec().getCpus()))
                 .replaceAll(Pattern.quote("${baseimg}"), "/home/" + getHypervisor().getUsername() + "/" + baseImagePath())
-                .replaceAll(Pattern.quote("${bootimg}"), "/home/" + getHypervisor().getUsername() + "/" + getImagePath())
+                .replaceAll(Pattern.quote("${bootimg}"), "/home/" + getHypervisor().getUsername() + "/" + "/ib/images/coreos_production_iso_image.iso")
                 .replaceAll(Pattern.quote("${helperimg}"), "/home/" + getHypervisor().getUsername() + "/" + vmPath() + "/helper.iso")
                 .replaceAll(Pattern.quote("${mac}"), vm.getMac())
+                .replaceAll(Pattern.quote("${vmdir}"), "/home/"+getHypervisor().getUsername()+"/"+vmPath())
                 .replace("\"", "\\\"");
         return xml;
     }

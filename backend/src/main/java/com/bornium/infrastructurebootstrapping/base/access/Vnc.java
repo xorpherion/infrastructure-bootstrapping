@@ -39,6 +39,8 @@ public class Vnc {
                 type(SHIFT, '2');
             else if (c == '>')
                 type(SHIFT, '>');
+            else if (c == '_')
+                type(SHIFT, '-');
             else
                 type(c);
         }
@@ -54,6 +56,8 @@ public class Vnc {
     }
 
     public void type(int... chars) {
+        /*for(int c : chars)
+            client.type(c);*/
         for (int c : chars) {
             client.keyPress(c, true);
         }

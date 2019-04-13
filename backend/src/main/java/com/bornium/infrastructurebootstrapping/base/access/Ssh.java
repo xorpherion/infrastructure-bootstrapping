@@ -134,7 +134,9 @@ public class Ssh {
     }
 
     public void disconnect() {
-        session.disconnect();
+        if(session != null)
+            session.disconnect();
+        session = null;
     }
 
     public static String quote(String str){

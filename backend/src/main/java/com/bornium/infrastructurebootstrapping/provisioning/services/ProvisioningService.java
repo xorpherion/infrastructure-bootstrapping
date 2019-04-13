@@ -28,11 +28,24 @@ public class ProvisioningService {
     }
 
     public void recreate(Cloud cloud){
-        cloudToTasks(cloud).forEach(task -> {
+        List<Thread> tasks = cloudToTasks(cloud).stream().map(task -> {
+            Thread t = new Thread(() -> {
+                System.out.println("Thread start: " + Thread.currentThread().getName());
+                try {
+                    task.recreateVm();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                System.out.println("Thread finish: " + Thread.currentThread().getName());
+            });
+            t.start();
+            return t;
+        }).collect(Collectors.toList());
+        tasks.forEach(task -> {
             try {
-                task.recreateVm();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+                task.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         });
     }
