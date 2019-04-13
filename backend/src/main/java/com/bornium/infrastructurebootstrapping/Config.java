@@ -4,28 +4,23 @@ import com.bornium.infrastructurebootstrapping.provisioning.entities.cloud.Cloud
 import com.bornium.infrastructurebootstrapping.provisioning.entities.credentials.Credentials;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.MachineSpec;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem.OperatingSystem;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.user.Authentication;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class Config {
 
-    List<MachineSpec> machineSpecs;
-    List<OperatingSystem> operatingSystems;
-    List<Credentials> credentials;
-    List<Cloud> clouds;
+    final List<MachineSpec> machineSpecs;
+    final List<OperatingSystem> operatingSystems;
+    final List<Credentials> credentials;
+    final List<Authentication> authentications;
+    final List<Cloud> clouds;
 
-    /*public Config(Map<String,Object> configMap) {
-        machineSpecs = ((List<Map>) configMap.get("machineSpecs")).stream().map(tRaw -> Util.mapper().convertValue(tRaw,MachineSpec.class)).collect(Collectors.toList());
-    }*/
-
-    public Config(List<MachineSpec> machineSpecs, List<OperatingSystem> operatingSystems, List<Credentials> credentials , List<Cloud> clouds) {
+    public Config(List<MachineSpec> machineSpecs, List<OperatingSystem> operatingSystems, List<Credentials> credentials, List<Authentication> authentications, List<Cloud> clouds) {
         this.machineSpecs = machineSpecs;
         this.operatingSystems = operatingSystems;
         this.credentials = credentials;
+        this.authentications = authentications;
         this.clouds = clouds;
     }
 
@@ -43,5 +38,9 @@ public class Config {
 
     public List<Credentials> getCredentials() {
         return credentials;
+    }
+
+    public List<Authentication> getAuthentications() {
+        return authentications;
     }
 }

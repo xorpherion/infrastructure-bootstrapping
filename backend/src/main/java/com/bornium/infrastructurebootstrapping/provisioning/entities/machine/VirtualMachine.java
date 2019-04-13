@@ -6,7 +6,7 @@ import javax.persistence.Entity;
 
 public class VirtualMachine extends Machine {
 
-    public VirtualMachine(String id, String operatingSystem, String machineSpec, String mac, String ip) {
-        super(id, operatingSystem, machineSpec, mac, ip);
+    public VirtualMachine(String id, String operatingSystem, String machineSpec, String mac, String ip, String gateway, String dns) {
+        super(id, operatingSystem, machineSpec, mac, ip, gateway,dns);
     }
 }

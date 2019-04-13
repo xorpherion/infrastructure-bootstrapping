@@ -34,6 +34,8 @@ public class ContainerLinux extends OperatingSystem {
     private String createIgnitionFile(ProvisioningTask task) throws IOException {
         return StreamUtils.copyToString(this.getClass().getResourceAsStream("/operatingsystem/containerlinux/ignition-template"), Charset.defaultCharset())
                 .replace("\"", "\\\"")
-                .replace("${ip}", task.getVirtualMachine().getIp());
+                .replace("${ip}", task.getVirtualMachine().getIp())
+                .replace("${dns}", task.getVirtualMachine().getDns())
+                .replace("${gateway}", task.getVirtualMachine().getGateway());
     }
 }
