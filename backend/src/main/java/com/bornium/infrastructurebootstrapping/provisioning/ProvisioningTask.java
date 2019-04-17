@@ -12,18 +12,22 @@ import java.util.stream.Stream;
 public abstract class ProvisioningTask {
     private final Hypervisor hypervisor;
     private final VirtualMachine virtualMachine;
-    private final Ssh ssh;
+    private Credentials vmCredentials;
+    private final Ssh hypervisorSsh;
+    private final Ssh vmSsh;
     private final Credentials loginCredentials;
     private final OperatingSystem operatingSystem;
     private final MachineSpec machineSpec;
 
-    public ProvisioningTask(Hypervisor hypervisor, Credentials loginCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec) {
-        this.loginCredentials = loginCredentials;
+    public ProvisioningTask(Hypervisor hypervisor, Credentials hypervisorCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec, Credentials vmCredentials) {
+        this.loginCredentials = hypervisorCredentials;
         this.operatingSystem = operatingSystem;
         this.machineSpec = machineSpec;
         this.hypervisor = hypervisor;
         this.virtualMachine = virtualMachine;
-        this.ssh = new Ssh(hypervisor.getHost(), hypervisor.getPort(), hypervisor.getUsername(), loginCredentials);
+        this.vmCredentials = vmCredentials;
+        this.hypervisorSsh = new Ssh(hypervisor.getHost(), hypervisor.getPort(), hypervisor.getUsername(), hypervisorCredentials);
+        this.vmSsh = new Ssh(virtualMachine.getIp(),22,virtualMachine.getSshUser(), vmCredentials);
     }
 
     public void createVm() throws Exception{
@@ -41,10 +45,15 @@ public abstract class ProvisioningTask {
         System.out.println("Waiting for VM to start up");
         int counter = 0;
         while(true){
-            getSsh().disconnect();
-            String res = getSsh().exec("ls");
-            if(Stream.of(res.split("\n")).filter(str -> str.contains("exit-status:")).findFirst().get().contains("0"))
-                break;
+            try {
+                getVmSsh().disconnect();
+                String res = getVmSsh().exec("ls");
+                System.out.println(res);
+                if (Stream.of(res.split("\n")).filter(str -> str.contains("exit-status:")).findFirst().get().contains("0"))
+                    break;
+            }catch (Exception e){
+                e.printStackTrace();
+            }
             counter++;
             if(counter >= 300)
                 throw new RuntimeException("could not connect to newly created vm with name: " + virtualMachine.getId());
@@ -90,7 +99,7 @@ public abstract class ProvisioningTask {
     }
 
     public void createVMDirectory() {
-        ssh.execPrint("mkdir -p " + Ssh.quote(vmPath()));
+        hypervisorSsh.execPrint("mkdir -p " + Ssh.quote(vmPath()));
     }
 
     public String vmPath() {
@@ -110,8 +119,8 @@ public abstract class ProvisioningTask {
         return virtualMachine;
     }
 
-    public Ssh getSsh() {
-        return ssh;
+    public Ssh getHypervisorSsh() {
+        return hypervisorSsh;
     }
 
     public Credentials getLoginCredentials() {
@@ -124,5 +133,13 @@ public abstract class ProvisioningTask {
 
     public MachineSpec getMachineSpec() {
         return machineSpec;
+    }
+
+    public Ssh getVmSsh() {
+        return vmSsh;
+    }
+
+    public Credentials getVmCredentials() {
+        return vmCredentials;
     }
 }

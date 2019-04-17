@@ -19,7 +19,7 @@ public class Virsh extends Hypervisor {
     }
 
     @Override
-    public ProvisioningTask createTask(Credentials loginCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec) {
-        return new VirshProvisioningTask(this,loginCredentials,virtualMachine,operatingSystem,machineSpec);
+    public ProvisioningTask createTask(Credentials loginCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec, Credentials vmCredentials) {
+        return new VirshProvisioningTask(this,loginCredentials,virtualMachine,operatingSystem,machineSpec,vmCredentials);
     }
 }

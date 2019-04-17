@@ -55,6 +55,6 @@ public class ProvisioningService {
     }
 
     private ProvisioningTask createTask(Hypervisor hypervisor, VirtualMachine vm) {
-        return hypervisor.createTask(credentialsService.get(hypervisor.getLoginCredentials()),vm,operatingSystemService.get(vm.getOperatingSystem()),machineSpecService.get(vm.getMachineSpec()));
+        return hypervisor.createTask(credentialsService.get(hypervisor.getLoginCredentials()),vm,operatingSystemService.get(vm.getOperatingSystem()),machineSpecService.get(vm.getMachineSpec()), credentialsService.get(vm.getCredentials()));
     }
 }

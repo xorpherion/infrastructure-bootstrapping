@@ -34,21 +34,11 @@
             <source file="${baseimg}"/>
             <target dev="hda" bus="ide"/>
         </disk>
-        <disk type="file" device="cdrom">
-            <driver name="qemu" type="raw"/>
-            <source file="${bootimg}"/>
-            <target dev="hdb" bus="ide"/>
-            <readonly/>
-        </disk>
-        <filesystem type="mount" accessmode="mapped">
-            <source dir="${vmdir}"/>
-            <target dir="mounted"/>
-        </filesystem>
+        ${filesystems}
         <interface type="bridge">
             <source bridge="br0"/>
             <mac address="${mac}"/>
         </interface>
-        <graphics type="vnc" autoport="yes" listen="0.0.0.0"/>
         <console type="pty"/>
     </devices>
 </domain>

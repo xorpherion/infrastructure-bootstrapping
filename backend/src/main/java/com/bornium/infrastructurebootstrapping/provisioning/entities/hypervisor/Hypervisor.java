@@ -59,5 +59,5 @@ public abstract class Hypervisor extends Base {
         return vms;
     }
 
-    public abstract ProvisioningTask createTask(Credentials loginCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec);
+    public abstract ProvisioningTask createTask(Credentials loginCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec, Credentials vmCredentials);
 }

@@ -26,9 +26,9 @@ public class ContainerLinux extends OperatingSystem {
 
     @Override
     public void createInstallHelperFiles(ProvisioningTask task) throws Exception {
-        task.getSsh().execSudoPrint("touch " + Ssh.quote(task.vmPath() + "/ignition"));
-        task.getSsh().execSudoPrint("bash -c 'echo \"" + createIgnitionFile(task) + "\" > " + Ssh.dquote(task.vmPath() + "/ignition")+"'");
-        task.getSsh().execSudoPrint("cp " + Ssh.quote("ib/images/" + getInstallImage()) + " " + Ssh.quote(task.vmPath() + "/install.bin.bz2"));
+        task.getHypervisorSsh().execSudoPrint("touch " + Ssh.quote(task.vmPath() + "/ignition"));
+        task.getHypervisorSsh().execSudoPrint("bash -c 'echo \"" + createIgnitionFile(task) + "\" > " + Ssh.dquote(task.vmPath() + "/ignition")+"'");
+        task.getHypervisorSsh().execSudoPrint("cp " + Ssh.quote("ib/images/" + getInstallImage()) + " " + Ssh.quote(task.vmPath() + "/install.bin.bz2"));
     }
 
     private String createIgnitionFile(ProvisioningTask task) throws IOException {

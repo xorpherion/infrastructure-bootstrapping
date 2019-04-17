@@ -29,15 +29,14 @@ import java.util.stream.Stream;
 
 public class VirshProvisioningTask extends ProvisioningTask {
 
-    public VirshProvisioningTask(Hypervisor hypervisor, Credentials loginCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec) {
-        super(hypervisor, loginCredentials, virtualMachine, operatingSystem, machineSpec);
+    public VirshProvisioningTask(Hypervisor hypervisor, Credentials hypervisorCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec, Credentials vmCredentials) {
+        super(hypervisor, hypervisorCredentials, virtualMachine, operatingSystem, machineSpec,vmCredentials);
     }
 
     @Override
     protected void postProcessVm() {
-        Ssh vmSsh = null;
-        vmSsh.execSudoPrint("mkdir /ib/");
-        vmSsh.execSudoPrint("mount -t 9p -o rw,trans=virtio,version=9p2000.L mounted /ib/");
+        getVmSsh().execSudoPrint("mkdir /ib/");
+        getVmSsh().execSudoPrint("mount -t 9p -o rw,trans=virtio,version=9p2000.L mounted /ib/");
     }
 
     @Override
@@ -47,13 +46,13 @@ public class VirshProvisioningTask extends ProvisioningTask {
 
         //getSsh().execSudoPrint("mkisofs -o " + Ssh.quote(vmPath() + "/helper.iso") +" " + Ssh.quote(vmPath() + "/helper"));
 
-        getSsh().execSudoPrint("rm " + Ssh.quote(vmPath() + "/vm.xml"));
-        getSsh().execSudoPrint("bash -c \"echo '" + createVmXml(getVirtualMachine()) + "' > " + Ssh.quote(vmPath() + "/vm.xml") + "\"");
-        getSsh().execSudoPrint("virsh define " + Ssh.quote(vmPath() + "/vm.xml"));
-        getSsh().execSudoPrint("virsh autostart " +Ssh.quote(getVirtualMachine().getId()));
-        getSsh().execSudoPrint("virsh start " + Ssh.quote(getVirtualMachine().getId()));
+        getHypervisorSsh().execSudoPrint("rm " + Ssh.quote(vmPath() + "/vm.xml"));
+        getHypervisorSsh().execSudoPrint("bash -c \"echo '" + createVmXml(getVirtualMachine()) + "' > " + Ssh.quote(vmPath() + "/vm.xml") + "\"");
+        getHypervisorSsh().execSudoPrint("virsh define " + Ssh.quote(vmPath() + "/vm.xml"));
+        getHypervisorSsh().execSudoPrint("virsh autostart " +Ssh.quote(getVirtualMachine().getId()));
+        getHypervisorSsh().execSudoPrint("virsh start " + Ssh.quote(getVirtualMachine().getId()));
 
-        String vncPortStr = getSsh().execSudoPrint("virsh vncdisplay " + Ssh.quote(getVirtualMachine().getId())).split(":")[1].substring(0,1);
+        String vncPortStr = getHypervisorSsh().execSudoPrint("virsh vncdisplay " + Ssh.quote(getVirtualMachine().getId())).split(":")[1].substring(0,1);
         int vncPort = Integer.parseInt(vncPortStr);
 
         System.out.println("Waiting for vm startup");
@@ -75,14 +74,14 @@ public class VirshProvisioningTask extends ProvisioningTask {
 
         System.out.println("Waiting for install");
         while (true) {
-            String vmState = getSsh().execSudo("virsh domstate " + Ssh.quote(getVirtualMachine().getId()));
+            String vmState = getHypervisorSsh().execSudo("virsh domstate " + Ssh.quote(getVirtualMachine().getId()));
             Thread.sleep(1000);
             if (vmState.contains("shut off"))
                 break;
         }
         System.out.println("Install done");
 
-        getSsh().execSudoPrint("virsh start " + Ssh.quote(getVirtualMachine().getId()));
+        getHypervisorSsh().execSudoPrint("virsh start " + Ssh.quote(getVirtualMachine().getId()));
     }
 
     private Consumer<Image> blockUntilImageStabilizes(CountDownLatch cdl) {
@@ -164,15 +163,15 @@ public class VirshProvisioningTask extends ProvisioningTask {
     @Override
     protected void createDisks()  throws Exception{
         getMachineSpec().getDisks().forEach(disk -> {
-            getSsh().execSudoPrint("qemu-img create -f qcow2 " + Ssh.quote(baseImagePath()) + " " + disk.getSize().bytes() + "B");
+            getHypervisorSsh().execSudoPrint("qemu-img create -f qcow2 " + Ssh.quote(baseImagePath()) + " " + disk.getSize().bytes() + "B");
         });
     }
 
     @Override
     protected void delete()  throws Exception{
-        getSsh().execSudoPrint("virsh destroy " + Ssh.quote(getVirtualMachine().getId()));
-        getSsh().execSudoPrint("virsh undefine " + Ssh.quote(getVirtualMachine().getId()));
-        getSsh().execSudoPrint("rm -r " + Ssh.quote(vmPath()));
+        getHypervisorSsh().execSudoPrint("virsh destroy " + Ssh.quote(getVirtualMachine().getId()));
+        getHypervisorSsh().execSudoPrint("virsh undefine " + Ssh.quote(getVirtualMachine().getId()));
+        getHypervisorSsh().execSudoPrint("rm -r " + Ssh.quote(vmPath()));
     }
 
     private String createVmXml(VirtualMachine vm) throws IOException {
