@@ -6,12 +6,8 @@ import com.bornium.infrastructurebootstrapping.provisioning.entities.credentials
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.MachineSpec;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem.OperatingSystem;
-import com.bornium.infrastructurebootstrapping.provisioning.entities.user.User;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.bornium.infrastructurebootstrapping.provisioning.services.AuthenticationsService;
 
-import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Hypervisor extends Base {
@@ -59,5 +55,5 @@ public abstract class Hypervisor extends Base {
         return vms;
     }
 
-    public abstract ProvisioningTask createTask(Credentials loginCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec, Credentials vmCredentials);
+    public abstract ProvisioningTask createTask(Credentials loginCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec, Credentials vmCredentials, AuthenticationsService authenticationsService);
 }

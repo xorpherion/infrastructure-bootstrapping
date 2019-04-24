@@ -6,10 +6,8 @@ import com.bornium.infrastructurebootstrapping.provisioning.entities.credentials
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.MachineSpec;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem.OperatingSystem;
-import com.bornium.infrastructurebootstrapping.provisioning.entities.user.User;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.bornium.infrastructurebootstrapping.provisioning.services.AuthenticationsService;
 
-import javax.persistence.Entity;
 import java.util.List;
 
 public class Virsh extends Hypervisor {
@@ -19,7 +17,7 @@ public class Virsh extends Hypervisor {
     }
 
     @Override
-    public ProvisioningTask createTask(Credentials loginCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec, Credentials vmCredentials) {
-        return new VirshProvisioningTask(this,loginCredentials,virtualMachine,operatingSystem,machineSpec,vmCredentials);
+    public ProvisioningTask createTask(Credentials loginCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec, Credentials vmCredentials, AuthenticationsService authenticationsService) {
+        return new VirshProvisioningTask(this,loginCredentials,virtualMachine,operatingSystem,machineSpec,vmCredentials, authenticationsService);
     }
 }

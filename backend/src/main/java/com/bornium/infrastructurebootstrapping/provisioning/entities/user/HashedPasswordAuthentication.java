@@ -13,4 +13,9 @@ public class HashedPasswordAuthentication extends Authentication {
     }
 
     private final String password;
+
+    @Override
+    public String getValue() {
+        return getPassword();
+    }
 }

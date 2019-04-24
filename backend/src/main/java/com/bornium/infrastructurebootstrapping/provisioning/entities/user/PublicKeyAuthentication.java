@@ -14,4 +14,9 @@ public class PublicKeyAuthentication extends Authentication {
     public String getPublicKey() {
         return publicKey;
     }
+
+    @Override
+    public String getValue() {
+        return getPublicKey();
+    }
 }

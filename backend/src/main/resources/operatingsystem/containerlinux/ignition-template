@@ -4,9 +4,16 @@
         "timeouts": {},
         "version": "2.1.0"
      },
-    "networkd": {},
+    "networkd": {
+        "units": [
+          {
+            "contents": "[Match]\nName=ens4\n\n[Network]\nDNS=${dns}\nAddress=${ip}\nGateway=${gateway}",
+            "name": "00-ens4.network"
+          }
+        ]
+      },
     "passwd": {
-
+        "users": ${users}
     },
    "storage": {},
    "systemd": {}

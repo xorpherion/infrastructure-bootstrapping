@@ -7,6 +7,7 @@ import com.bornium.infrastructurebootstrapping.provisioning.entities.hypervisor.
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.MachineSpec;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem.OperatingSystem;
+import com.bornium.infrastructurebootstrapping.provisioning.services.AuthenticationsService;
 import org.springframework.util.StreamUtils;
 
 import javax.imageio.ImageIO;
@@ -29,8 +30,8 @@ import java.util.stream.Stream;
 
 public class VirshProvisioningTask extends ProvisioningTask {
 
-    public VirshProvisioningTask(Hypervisor hypervisor, Credentials hypervisorCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec, Credentials vmCredentials) {
-        super(hypervisor, hypervisorCredentials, virtualMachine, operatingSystem, machineSpec,vmCredentials);
+    public VirshProvisioningTask(Hypervisor hypervisor, Credentials hypervisorCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec, Credentials vmCredentials, AuthenticationsService authenticationsService) {
+        super(hypervisor, hypervisorCredentials, virtualMachine, operatingSystem, machineSpec,vmCredentials, authenticationsService);
     }
 
     @Override

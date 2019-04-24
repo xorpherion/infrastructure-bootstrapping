@@ -16,11 +16,13 @@ public class ProvisioningService {
     final MachineSpecService machineSpecService;
     final OperatingSystemService operatingSystemService;
     final CredentialsService credentialsService;
+    final AuthenticationsService authenticationsService;
 
-    public ProvisioningService(MachineSpecService machineSpecService, OperatingSystemService operatingSystemService, CredentialsService credentialsService) {
+    public ProvisioningService(MachineSpecService machineSpecService, OperatingSystemService operatingSystemService, CredentialsService credentialsService, AuthenticationsService authenticationsService) {
         this.machineSpecService = machineSpecService;
         this.operatingSystemService = operatingSystemService;
         this.credentialsService = credentialsService;
+        this.authenticationsService = authenticationsService;
     }
 
     public void recreate(Config config){
@@ -55,6 +57,6 @@ public class ProvisioningService {
     }
 
     private ProvisioningTask createTask(Hypervisor hypervisor, VirtualMachine vm) {
-        return hypervisor.createTask(credentialsService.get(hypervisor.getLoginCredentials()),vm,operatingSystemService.get(vm.getOperatingSystem()),machineSpecService.get(vm.getMachineSpec()), credentialsService.get(vm.getCredentials()));
+        return hypervisor.createTask(credentialsService.get(hypervisor.getLoginCredentials()),vm,operatingSystemService.get(vm.getOperatingSystem()),machineSpecService.get(vm.getMachineSpec()), credentialsService.get(vm.getCredentials()), authenticationsService);
     }
 }

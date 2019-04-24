@@ -6,4 +6,6 @@ public abstract class Authentication extends Base {
     public Authentication(String id) {
         super(id);
     }
+
+    public abstract String getValue();
 }

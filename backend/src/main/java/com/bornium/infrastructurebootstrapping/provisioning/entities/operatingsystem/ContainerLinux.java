@@ -3,10 +3,16 @@ package com.bornium.infrastructurebootstrapping.provisioning.entities.operatings
 import com.bornium.infrastructurebootstrapping.base.access.Ssh;
 import com.bornium.infrastructurebootstrapping.provisioning.ProvisioningTask;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ContainerLinux extends OperatingSystem {
 
@@ -36,6 +42,17 @@ public class ContainerLinux extends OperatingSystem {
                 .replace("\"", "\\\"")
                 .replace("${ip}", task.getVirtualMachine().getIp())
                 .replace("${dns}", task.getVirtualMachine().getDns())
-                .replace("${gateway}", task.getVirtualMachine().getGateway());
+                .replace("${gateway}", task.getVirtualMachine().getGateway())
+                .replace("${users}", users(task));
+    }
+
+    private String users(ProvisioningTask task) throws JsonProcessingException {
+        return new ObjectMapper().writeValueAsString(task.getVirtualMachine().getAuthorizedKeys().stream().map(a -> {
+            Map m = new HashMap();
+            m.put("name", a.getUser());
+            m.put("sshAuthorizedKeys", a.getAuthenticationNames().stream().map(name -> task.getAuthenticationsService().get(name).getValue()).collect(Collectors.toList()));
+            m.put("groups", a.getGroups());
+            return m;
+        }).collect(Collectors.toList())).replace("\"","\\\"");
     }
 }

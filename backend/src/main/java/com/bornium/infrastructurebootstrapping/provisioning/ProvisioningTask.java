@@ -6,6 +6,7 @@ import com.bornium.infrastructurebootstrapping.provisioning.entities.hypervisor.
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.MachineSpec;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem.OperatingSystem;
+import com.bornium.infrastructurebootstrapping.provisioning.services.AuthenticationsService;
 
 import java.util.stream.Stream;
 
@@ -13,19 +14,21 @@ public abstract class ProvisioningTask {
     private final Hypervisor hypervisor;
     private final VirtualMachine virtualMachine;
     private Credentials vmCredentials;
+    private AuthenticationsService authenticationsService;
     private final Ssh hypervisorSsh;
     private final Ssh vmSsh;
     private final Credentials loginCredentials;
     private final OperatingSystem operatingSystem;
     private final MachineSpec machineSpec;
 
-    public ProvisioningTask(Hypervisor hypervisor, Credentials hypervisorCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec, Credentials vmCredentials) {
+    public ProvisioningTask(Hypervisor hypervisor, Credentials hypervisorCredentials, VirtualMachine virtualMachine, OperatingSystem operatingSystem, MachineSpec machineSpec, Credentials vmCredentials, AuthenticationsService authenticationsService) {
         this.loginCredentials = hypervisorCredentials;
         this.operatingSystem = operatingSystem;
         this.machineSpec = machineSpec;
         this.hypervisor = hypervisor;
         this.virtualMachine = virtualMachine;
         this.vmCredentials = vmCredentials;
+        this.authenticationsService = authenticationsService;
         this.hypervisorSsh = new Ssh(hypervisor.getHost(), hypervisor.getPort(), hypervisor.getUsername(), hypervisorCredentials);
         this.vmSsh = new Ssh(virtualMachine.getIp(),22,virtualMachine.getSshUser(), vmCredentials);
     }
@@ -141,5 +144,9 @@ public abstract class ProvisioningTask {
 
     public Credentials getVmCredentials() {
         return vmCredentials;
+    }
+
+    public AuthenticationsService getAuthenticationsService() {
+        return authenticationsService;
     }
 }
