@@ -30,7 +30,7 @@ public abstract class ProvisioningTask {
         this.vmCredentials = vmCredentials;
         this.authenticationsService = authenticationsService;
         this.hypervisorSsh = new Ssh(hypervisor.getHost(), hypervisor.getPort(), hypervisor.getUsername(), hypervisorCredentials);
-        this.vmSsh = new Ssh(virtualMachine.getIp(),22,virtualMachine.getSshUser(), vmCredentials);
+        this.vmSsh = new Ssh(virtualMachine.getHost(),22,virtualMachine.getSshUser(), vmCredentials);
     }
 
     public void createVm() throws Exception{
@@ -40,6 +40,11 @@ public abstract class ProvisioningTask {
         installVmAndReboot();
         waitUntilVmBoot();
         postProcessVm();
+        installPlatform();
+    }
+
+    private void installPlatform() {
+        operatingSystem.installPlatform(this);
     }
 
     protected abstract void postProcessVm();

@@ -4,7 +4,7 @@ import com.bornium.infrastructurebootstrapping.provisioning.entities.credentials
 
 public class PhysicalMachine extends Machine {
 
-    public PhysicalMachine(String id, String operatingSystem, String mac, String ip, String gateway, String dns, String sshUser, String credentials){
-        super(id,operatingSystem,null,mac,ip, gateway, dns, sshUser, credentials);
+    public PhysicalMachine(String id, String operatingSystem, String mac, String host, String ip, String gateway, String dns, String sshUser, String credentials, Platform platform){
+        super(id,operatingSystem,null,mac,host,ip, gateway, dns, sshUser, credentials, platform);
     }
 }

@@ -37,6 +37,11 @@ public class ContainerLinux extends OperatingSystem {
         task.getHypervisorSsh().execSudoPrint("cp " + Ssh.quote("ib/images/" + getInstallImage()) + " " + Ssh.quote(task.vmPath() + "/install.bin.bz2"));
     }
 
+    @Override
+    public void installPlatform(ProvisioningTask provisioningTask) {
+
+    }
+
     private String createIgnitionFile(ProvisioningTask task) throws IOException {
         return StreamUtils.copyToString(this.getClass().getResourceAsStream("/operatingsystem/containerlinux/ignition-template"), Charset.defaultCharset())
                 .replace("\"", "\\\"")

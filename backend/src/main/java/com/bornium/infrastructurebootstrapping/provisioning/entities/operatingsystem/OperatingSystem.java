@@ -31,4 +31,6 @@ public abstract class OperatingSystem extends Base {
     public abstract String getVncCommandForInstallAndShutdown(ProvisioningTask task);
 
     public abstract void createInstallHelperFiles(ProvisioningTask task) throws Exception;
+
+    public abstract void installPlatform(ProvisioningTask provisioningTask);
 }
