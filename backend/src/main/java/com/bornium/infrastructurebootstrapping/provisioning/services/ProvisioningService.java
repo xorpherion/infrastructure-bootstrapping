@@ -2,7 +2,7 @@ package com.bornium.infrastructurebootstrapping.provisioning.services;
 
 import com.bornium.infrastructurebootstrapping.Config;
 import com.bornium.infrastructurebootstrapping.provisioning.ProvisioningTask;
-import com.bornium.infrastructurebootstrapping.provisioning.entities.cloud.Cloud;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.cloud.Infrastructure;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.hypervisor.Hypervisor;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
 import org.springframework.stereotype.Service;
@@ -26,11 +26,11 @@ public class ProvisioningService {
     }
 
     public void recreate(Config config){
-        config.getClouds().stream().forEach(cloud -> recreate(cloud));
+        config.getInfrastructures().stream().forEach(infrastructure -> recreate(infrastructure));
     }
 
-    public void recreate(Cloud cloud){
-        List<Thread> tasks = cloudToTasks(cloud).stream().map(task -> {
+    public void recreate(Infrastructure infrastructure){
+        List<Thread> tasks = cloudToTasks(infrastructure).stream().map(task -> {
             Thread t = new Thread(() -> {
                 System.out.println("Thread start: " + Thread.currentThread().getName());
                 try {
@@ -52,8 +52,8 @@ public class ProvisioningService {
         });
     }
 
-    private List<ProvisioningTask> cloudToTasks(Cloud cloud) {
-        return cloud.getHypervisors().stream().map(hypervisor -> hypervisor.getVms().stream().map(vm -> createTask(hypervisor, vm)).collect(Collectors.toList())).flatMap(o -> o.stream()).collect(Collectors.toList());
+    private List<ProvisioningTask> cloudToTasks(Infrastructure infrastructure) {
+        return infrastructure.getHypervisors().stream().map(hypervisor -> hypervisor.getVms().stream().map(vm -> createTask(hypervisor, vm)).collect(Collectors.toList())).flatMap(o -> o.stream()).collect(Collectors.toList());
     }
 
     private ProvisioningTask createTask(Hypervisor hypervisor, VirtualMachine vm) {

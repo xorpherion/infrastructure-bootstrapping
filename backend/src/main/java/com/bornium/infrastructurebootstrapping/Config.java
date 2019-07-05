@@ -1,8 +1,9 @@
 package com.bornium.infrastructurebootstrapping;
 
-import com.bornium.infrastructurebootstrapping.provisioning.entities.cloud.Cloud;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.cloud.Infrastructure;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.credentials.Credentials;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.MachineSpec;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.platform.Platform;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem.OperatingSystem;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.user.Authentication;
 
@@ -14,18 +15,20 @@ public class Config {
     final List<OperatingSystem> operatingSystems;
     final List<Credentials> credentials;
     final List<Authentication> authentications;
-    final List<Cloud> clouds;
+    final List<Infrastructure> infrastructures;
+    final List<Platform> platforms;
 
-    public Config(List<MachineSpec> machineSpecs, List<OperatingSystem> operatingSystems, List<Credentials> credentials, List<Authentication> authentications, List<Cloud> clouds) {
+    public Config(List<MachineSpec> machineSpecs, List<OperatingSystem> operatingSystems, List<Credentials> credentials, List<Authentication> authentications, List<Infrastructure> infrastructures, List<Platform> platforms) {
         this.machineSpecs = machineSpecs;
         this.operatingSystems = operatingSystems;
         this.credentials = credentials;
         this.authentications = authentications;
-        this.clouds = clouds;
+        this.infrastructures = infrastructures;
+        this.platforms = platforms;
     }
 
-    public List<Cloud> getClouds() {
-        return clouds;
+    public List<Infrastructure> getInfrastructures() {
+        return infrastructures;
     }
 
     public List<MachineSpec> getMachineSpecs() {
@@ -42,5 +45,9 @@ public class Config {
 
     public List<Authentication> getAuthentications() {
         return authentications;
+    }
+
+    public List<Platform> getPlatforms() {
+        return platforms;
     }
 }

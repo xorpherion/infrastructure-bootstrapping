@@ -1,6 +1,6 @@
 //package com.bornium.infrastructurebootstrapping.provisioning.repositories;
 //
-//import com.bornium.infrastructurebootstrapping.provisioning.entities.cloud.Cloud;
+//import com.bornium.infrastructurebootstrapping.provisioning.entities.cloud.Infrastructure;
 //
-//public interface VirtualMachineRepository extends BaseRepository<Cloud> {
+//public interface VirtualMachineRepository extends BaseRepository<Infrastructure> {
 //}

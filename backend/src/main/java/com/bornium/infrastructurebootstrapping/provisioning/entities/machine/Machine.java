@@ -1,6 +1,7 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities.machine;
 
 import com.bornium.infrastructurebootstrapping.provisioning.entities.Base;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.platform.Platform;
 
 public abstract class Machine extends Base {
 
@@ -13,9 +14,8 @@ public abstract class Machine extends Base {
     String sshUser;
     String credentials;
     String host;
-    Platform platform;
 
-    public Machine(String id, String operatingSystem, String machineSpec, String mac, String host, String ip, String gateway, String dns, String sshUser, String credentials, Platform platform) {
+    public Machine(String id, String operatingSystem, String machineSpec, String mac, String host, String ip, String gateway, String dns, String sshUser, String credentials) {
         super(id);
         this.machineSpec = machineSpec;
         this.operatingSystem = operatingSystem;
@@ -26,7 +26,6 @@ public abstract class Machine extends Base {
         this.dns = dns;
         this.sshUser = sshUser;
         this.credentials = credentials;
-        this.platform = platform;
     }
 
     public String getMachineSpec() {
@@ -63,9 +62,5 @@ public abstract class Machine extends Base {
 
     public String getHost() {
         return host;
-    }
-
-    public Platform getPlatform() {
-        return platform;
     }
 }

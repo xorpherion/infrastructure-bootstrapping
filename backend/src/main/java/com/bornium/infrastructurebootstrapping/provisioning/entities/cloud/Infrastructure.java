@@ -9,12 +9,12 @@ import javax.persistence.Entity;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Cloud extends Base {
+public class Infrastructure extends Base {
 
     private List<Hypervisor> hypervisors;
     private List<PhysicalMachine> physicalMachines;
 
-    public Cloud(String id, List<Hypervisor> hypervisors, List<PhysicalMachine> physicalMachines) {
+    public Infrastructure(String id, List<Hypervisor> hypervisors, List<PhysicalMachine> physicalMachines) {
         super(id);
         this.hypervisors = hypervisors;
         this.physicalMachines = physicalMachines;
