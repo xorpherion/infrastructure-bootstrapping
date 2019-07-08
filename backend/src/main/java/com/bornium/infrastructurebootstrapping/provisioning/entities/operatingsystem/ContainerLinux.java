@@ -1,7 +1,7 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem;
 
 import com.bornium.infrastructurebootstrapping.base.access.Ssh;
-import com.bornium.infrastructurebootstrapping.provisioning.ProvisioningTask;
+import com.bornium.infrastructurebootstrapping.provisioning.tasks.infrastructure.ProvisioningTask;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,7 +10,6 @@ import org.springframework.util.StreamUtils;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 

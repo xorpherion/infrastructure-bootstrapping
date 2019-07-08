@@ -1,4 +1,4 @@
-package com.bornium.infrastructurebootstrapping.provisioning;
+package com.bornium.infrastructurebootstrapping.provisioning.tasks.infrastructure;
 
 import com.bornium.infrastructurebootstrapping.base.access.Ssh;
 import com.bornium.infrastructurebootstrapping.base.access.Vnc;

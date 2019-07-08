@@ -2,7 +2,7 @@ package com.bornium.infrastructurebootstrapping.provisioning.entities.platform;
 
 import java.util.List;
 
-public class Kubernetes extends Platform {
+public abstract class Kubernetes extends Platform {
 
     final List<String> masters;
     final List<String> slaves;

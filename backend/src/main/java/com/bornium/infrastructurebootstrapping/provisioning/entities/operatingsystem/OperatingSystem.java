@@ -1,6 +1,6 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem;
 
-import com.bornium.infrastructurebootstrapping.provisioning.ProvisioningTask;
+import com.bornium.infrastructurebootstrapping.provisioning.tasks.infrastructure.ProvisioningTask;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.Base;
 
 public abstract class OperatingSystem extends Base {

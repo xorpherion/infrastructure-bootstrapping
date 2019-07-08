@@ -1,7 +1,7 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities.hypervisor;
 
-import com.bornium.infrastructurebootstrapping.provisioning.ProvisioningTask;
-import com.bornium.infrastructurebootstrapping.provisioning.VirshProvisioningTask;
+import com.bornium.infrastructurebootstrapping.provisioning.tasks.infrastructure.ProvisioningTask;
+import com.bornium.infrastructurebootstrapping.provisioning.tasks.infrastructure.VirshProvisioningTask;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.credentials.Credentials;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.MachineSpec;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;

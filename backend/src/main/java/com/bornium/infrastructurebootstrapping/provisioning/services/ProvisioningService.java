@@ -1,7 +1,7 @@
 package com.bornium.infrastructurebootstrapping.provisioning.services;
 
 import com.bornium.infrastructurebootstrapping.Config;
-import com.bornium.infrastructurebootstrapping.provisioning.ProvisioningTask;
+import com.bornium.infrastructurebootstrapping.provisioning.tasks.infrastructure.ProvisioningTask;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.cloud.Infrastructure;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.hypervisor.Hypervisor;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;

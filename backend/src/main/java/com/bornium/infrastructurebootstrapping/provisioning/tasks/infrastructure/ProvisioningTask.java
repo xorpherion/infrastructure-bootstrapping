@@ -1,4 +1,4 @@
-package com.bornium.infrastructurebootstrapping.provisioning;
+package com.bornium.infrastructurebootstrapping.provisioning.tasks.infrastructure;
 
 import com.bornium.infrastructurebootstrapping.base.access.Ssh;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.credentials.Credentials;
@@ -40,11 +40,6 @@ public abstract class ProvisioningTask {
         installVmAndReboot();
         waitUntilVmBoot();
         postProcessVm();
-        installPlatform();
-    }
-
-    private void installPlatform() {
-        operatingSystem.installPlatform(this);
     }
 
     protected abstract void postProcessVm();
