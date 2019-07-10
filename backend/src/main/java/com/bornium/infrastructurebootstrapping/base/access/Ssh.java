@@ -2,12 +2,13 @@ package com.bornium.infrastructurebootstrapping.base.access;
 
 import com.bornium.infrastructurebootstrapping.provisioning.entities.credentials.Credentials;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.user.User;
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.Session;
+import com.jcraft.jsch.*;
+import org.springframework.util.StreamUtils;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -131,6 +132,32 @@ public class Ssh {
 
     private String joinCommands(String... commands) {
         return String.join(";", commands);
+    }
+
+    public void copyToRemote(String source, String destination) throws FileNotFoundException, JSchException, SftpException {
+        ChannelSftp channel = null;
+        channel = (ChannelSftp)session.openChannel("sftp");
+        try {
+            channel.connect();
+            File localFile = Paths.get(source).toFile();
+            Path d = Paths.get(destination);
+            if(d.getNameCount() > 1)
+                channel.cd(d.subpath(0,d.getNameCount()-1).normalize().toString());
+            channel.put(new FileInputStream(localFile), d.getName(d.getNameCount()-1).toString());
+        }finally {
+            channel.disconnect();
+        }
+    }
+
+    public void copyToLocal(String source, String destination) throws IOException, JSchException, SftpException {
+        ChannelSftp channel = null;
+        channel = (ChannelSftp)session.openChannel("sftp");
+        try {
+            channel.connect();
+            Files.copy(channel.get(source),Paths.get(destination));
+        }finally {
+            channel.disconnect();
+        }
     }
 
     public void disconnect() {
