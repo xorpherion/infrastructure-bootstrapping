@@ -9,6 +9,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -57,30 +58,33 @@ public class Ssh {
     }
 
     public String exec(String... commands) {
-        return execInternal(joinCommands(commands));
+        return execInternal(t -> {},t -> {},joinCommands(commands));
+    }
+
+    public String exec(Consumer<String> stdPrinter, Consumer<String> errPrinter,String... commands) {
+        return execInternal(stdPrinter,errPrinter,joinCommands(commands));
     }
 
     public String execPrint(String... commands) {
         System.out.println("=== executing " + joinCommands(commands) + " ===");
-        String res = exec(commands);
-        System.out.println(res);
-        return res;
+        return exec(System.out::print,System.err::print,commands);
     }
 
     public String execSudo(String... commands) {
-        return execInternal(joinCommands(Stream.of(commands).map(cmd -> "sudo " + cmd).collect(Collectors.toList()).toArray(new String[0])));
+        return execInternal(t -> {},t -> {},joinCommands(Stream.of(commands).map(cmd -> "sudo " + cmd).collect(Collectors.toList()).toArray(new String[0])));
+    }
+
+    public String execSudo(Consumer<String> stdPrinter, Consumer<String> errPrinter,String... commands) {
+        return execInternal(stdPrinter,errPrinter,joinCommands(Stream.of(commands).map(cmd -> "sudo " + cmd).collect(Collectors.toList()).toArray(new String[0])));
     }
 
     public String execSudoPrint(String... commands) {
         System.out.println("=== executing " + joinCommands(commands) + " ===");
-        String res = execSudo(commands);
-        System.out.println(res);
-        return res;
+        return execSudo(System.out::print,System.err::print,commands);
     }
 
-    private String execInternal(String command) {
-        if (session == null)
-            connect();
+    private String execInternal(Consumer<String> stdPrinter, Consumer<String> errPrinter, String command) {
+        makeSureConnected();
         ChannelExec channel = null;
         String result = "";
         try {
@@ -98,19 +102,25 @@ public class Ssh {
                 while (inputStream.available() > 0) {
                     int i = inputStream.read(tmp, 0, 1024);
                     if (i < 0) break;
-                    result += (new String(tmp, 0, i));
+                    String t = new String(tmp, 0, i);
+                    stdPrinter.accept(t);
+                    result += t;
                 }
 
                 while (errStream.available() > 0) {
                     int i = errStream.read(tmp, 0, 1024);
                     if (i < 0) break;
-                    result += (new String(tmp, 0, i));
+                    String t = new String(tmp, 0, i);
+                    errPrinter.accept(t);
+                    result += t;
                 }
 
                 if ((channel).isClosed()) {
                     if (inputStream.available() > 0) continue;
                     if (errStream.available() > 0) continue;
-                    result += ("exit-status: " + ((ChannelExec) channel).getExitStatus());
+                    String t = "exit-status: " + ((ChannelExec) channel).getExitStatus() + System.lineSeparator();
+                    stdPrinter.accept(t);
+                    result += t;
                     break;
                 }
 
@@ -130,11 +140,17 @@ public class Ssh {
         }
     }
 
+    private void makeSureConnected() {
+        if (session == null)
+            connect();
+    }
+
     private String joinCommands(String... commands) {
         return String.join(";", commands);
     }
 
     public void copyToRemote(String source, String destination) throws FileNotFoundException, JSchException, SftpException {
+        makeSureConnected();
         ChannelSftp channel = null;
         channel = (ChannelSftp)session.openChannel("sftp");
         try {
@@ -142,7 +158,7 @@ public class Ssh {
             File localFile = Paths.get(source).toFile();
             Path d = Paths.get(destination);
             if(d.getNameCount() > 1)
-                channel.cd(d.subpath(0,d.getNameCount()-1).normalize().toString());
+                channel.cd(channel.pwd() + "/" + d.subpath(0,d.getNameCount()-1).normalize().toString().replace("\\","/"));
             channel.put(new FileInputStream(localFile), d.getName(d.getNameCount()-1).toString());
         }finally {
             channel.disconnect();
@@ -150,6 +166,7 @@ public class Ssh {
     }
 
     public void copyToLocal(String source, String destination) throws IOException, JSchException, SftpException {
+        makeSureConnected();
         ChannelSftp channel = null;
         channel = (ChannelSftp)session.openChannel("sftp");
         try {

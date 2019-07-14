@@ -47,6 +47,7 @@ public class ContainerLinux extends OperatingSystem {
                 .replace("${ip}", task.getVirtualMachine().getIp())
                 .replace("${dns}", task.getVirtualMachine().getDns())
                 .replace("${gateway}", task.getVirtualMachine().getGateway())
+                .replace("${host}", task.getVirtualMachine().getHost())
                 .replace("${users}", users(task));
     }
 

@@ -14,6 +14,7 @@ public abstract class Machine extends Base {
     String sshUser;
     String credentials;
     String host;
+    int sshPort = 22;
 
     public Machine(String id, String operatingSystem, String machineSpec, String mac, String host, String ip, String gateway, String dns, String sshUser, String credentials) {
         super(id);
@@ -62,5 +63,9 @@ public abstract class Machine extends Base {
 
     public String getHost() {
         return host;
+    }
+
+    public int getSshPort() {
+        return sshPort;
     }
 }

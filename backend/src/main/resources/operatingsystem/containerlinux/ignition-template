@@ -15,6 +15,13 @@
     "passwd": {
         "users": ${users}
     },
-   "storage": {},
+   "storage": {
+       "files": [{
+         "filesystem": "root",
+         "path": "/etc/hostname",
+         "mode": 420,
+         "contents": { "source": "data:,${host}" }
+       }]
+     },
    "systemd": {}
 }
