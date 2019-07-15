@@ -5,6 +5,7 @@ ip=$1
 kubectl drain master --delete-local-data --force --ignore-daemonsets
 kubectl delete node master
 kubeadm reset -f
+rm -r /var/lib/etcd
 iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
 ipvsadm -C
 
@@ -38,6 +39,7 @@ systemctl enable --now kubelet
 kubeadm config images pull
 kubeadm init --apiserver-advertise-address=$ip --pod-network-cidr=10.244.0.0/16 --node-name=master
 
+rm -r $HOME/.kube
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
@@ -47,6 +49,7 @@ kubectl apply -f https://docs.projectcalico.org/v3.7/manifests/canal.yaml
 
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta1/aio/deploy/recommended.yaml
 
+rm -r /home/bornium/.kube
 mkdir -p /home/bornium/.kube
 sudo cp -i /etc/kubernetes/admin.conf /home/bornium/.kube/config
 sudo chown 1000:1000 /home/bornium/.kube/config
