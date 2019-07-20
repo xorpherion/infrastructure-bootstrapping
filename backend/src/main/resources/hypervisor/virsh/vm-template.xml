@@ -45,7 +45,7 @@
             <target dir="mounted"/>
         </filesystem>
         <interface type="bridge">
-            <source bridge="kvmbr0"/>
+            <source bridge="br0"/>
             <mac address="${mac}"/>
         </interface>
         <graphics type="vnc" autoport="yes" listen="0.0.0.0"/>
