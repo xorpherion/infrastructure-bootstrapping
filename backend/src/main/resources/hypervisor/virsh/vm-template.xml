@@ -4,7 +4,7 @@
     <memory unit="b">${memory}</memory>
     <currentMemory unit="b">${memory}</currentMemory>
     <vcpu>${cpus}</vcpu>
-    <os>
+    <os firmware="efi">
         <type arch="x86_64">hvm</type>
         <boot dev="hd"/>
         <boot dev="cdrom"/>
@@ -45,7 +45,7 @@
             <target dir="mounted"/>
         </filesystem>
         <interface type="bridge">
-            <source bridge="br0"/>
+            <source bridge="kvmbr0"/>
             <mac address="${mac}"/>
         </interface>
         <graphics type="vnc" autoport="yes" listen="0.0.0.0"/>

@@ -113,8 +113,8 @@ public abstract class ProvisioningTask {
     }
 
     private boolean fileExistsRemote(String file) {
-        //TODO implement
-        return false;
+        String res = getHypervisorSsh().execSudoPrint("test -f " + file + "&& echo -n true || echo -n false");
+        return res.contains("true");
     }
 
     private void downloadInstallImageIfNeeded(String basePath) {
