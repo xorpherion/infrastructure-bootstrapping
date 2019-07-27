@@ -92,13 +92,34 @@ public abstract class ProvisioningTask {
         return getWorkdir() + "/images";
     }
 
-    public String getImagePath() {
+    public String getInstallImagePath() {
         return getImages() + "/" + operatingSystem.getInstallImage();
     }
 
-    protected void downloadImage() {
-        String imgName = operatingSystem.getDownloadLink();
+    public String getBootImagePath() {
+        return getImages() + "/" + operatingSystem.getBootImage();
+    }
 
+    protected void downloadImage() {
+        String basePath = operatingSystem.getDownloadLink();
+        getHypervisorSsh().execSudoPrint("mkdir -p " + getImages());
+        downloadInstallImageIfNeeded(basePath);
+        downloadBootImageIfNeeded(basePath);
+    }
+
+    private void downloadBootImageIfNeeded(String basePath) {
+        if(!fileExistsRemote(getImages() + "/" + getOperatingSystem().getBootImage()))
+            getHypervisorSsh().execSudoPrint("curl -o " + getInstallImagePath() + " " + basePath + getOperatingSystem().getBootImage());
+    }
+
+    private boolean fileExistsRemote(String file) {
+        String res = getHypervisorSsh().execSudoPrint("test -f " + file + "&& echo -n true || echo -n false");
+        return res.contains("true");
+    }
+
+    private void downloadInstallImageIfNeeded(String basePath) {
+        if(!fileExistsRemote(getImages() + "/" + getOperatingSystem().getInstallImage()))
+            getHypervisorSsh().execSudoPrint("curl -o " + getBootImagePath() + " " + basePath + getOperatingSystem().getInstallImage());
     }
 
     public void createVMDirectory() {

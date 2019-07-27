@@ -186,7 +186,7 @@ public class VirshProvisioningTask extends ProvisioningTask {
                 .replaceAll(Pattern.quote("${memory}"), String.valueOf(getMachineSpec().getRam().bytes()))
                 .replaceAll(Pattern.quote("${cpus}"), String.valueOf(getMachineSpec().getCpus()))
                 .replaceAll(Pattern.quote("${baseimg}"), "/home/" + getHypervisor().getUsername() + "/" + baseImagePath())
-                .replaceAll(Pattern.quote("${bootimg}"), "/home/" + getHypervisor().getUsername() + "/" + "/ib/images/coreos_production_iso_image.iso")
+                .replaceAll(Pattern.quote("${bootimg}"), "/home/" + getHypervisor().getUsername() + "/ib/images/coreos_production_iso_image.iso")
                 .replaceAll(Pattern.quote("${helperimg}"), "/home/" + getHypervisor().getUsername() + "/" + vmPath() + "/helper.iso")
                 .replaceAll(Pattern.quote("${mac}"), vm.getMac())
                 .replaceAll(Pattern.quote("${vmdir}"), "/home/"+getHypervisor().getUsername()+"/"+vmPath())

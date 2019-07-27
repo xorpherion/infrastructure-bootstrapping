@@ -4,7 +4,7 @@
     <memory unit="b">${memory}</memory>
     <currentMemory unit="b">${memory}</currentMemory>
     <vcpu>${cpus}</vcpu>
-    <os>
+    <os firmware="efi">
         <type arch="x86_64">hvm</type>
         <boot dev="hd"/>
         <boot dev="cdrom"/>
