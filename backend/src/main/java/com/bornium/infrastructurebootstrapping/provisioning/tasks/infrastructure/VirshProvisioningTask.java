@@ -6,6 +6,7 @@ import com.bornium.infrastructurebootstrapping.provisioning.entities.credentials
 import com.bornium.infrastructurebootstrapping.provisioning.entities.hypervisor.Hypervisor;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.MachineSpec;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.passthrough.DiskPassthrough;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem.OperatingSystem;
 import com.bornium.infrastructurebootstrapping.provisioning.services.AuthenticationsService;
 import org.springframework.util.StreamUtils;
@@ -25,6 +26,7 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -188,7 +190,12 @@ public class VirshProvisioningTask extends ProvisioningTask {
                 .replaceAll(Pattern.quote("${helperimg}"), "/home/" + getHypervisor().getUsername() + "/" + vmPath() + "/helper.iso")
                 .replaceAll(Pattern.quote("${mac}"), vm.getMac())
                 .replaceAll(Pattern.quote("${vmdir}"), "/home/"+getHypervisor().getUsername()+"/"+vmPath())
+                .replaceAll(Pattern.quote("${filesystems}"), vm.getDiskPassthroughs().stream().map(this::toDisk).collect(Collectors.joining()))
                 .replace("\"", "\\\"");
         return xml;
+    }
+
+    private String toDisk(DiskPassthrough diskPassthrough) {
+        return null;
     }
 }
