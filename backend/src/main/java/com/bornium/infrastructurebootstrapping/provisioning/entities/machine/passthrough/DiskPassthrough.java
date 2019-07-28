@@ -2,7 +2,7 @@ package com.bornium.infrastructurebootstrapping.provisioning.entities.machine.pa
 
 public class DiskPassthrough  {
 
-    enum Type{
+    public enum Type{
         FILE,
         LUN
     }

@@ -38,8 +38,8 @@ public class VirshProvisioningTask extends ProvisioningTask {
 
     @Override
     protected void postProcessVm() {
-        getVmSsh().execSudoPrint("mkdir /ib/");
-        getVmSsh().execSudoPrint("mount -t 9p -o rw,trans=virtio,version=9p2000.L mounted /ib/");
+        //getVmSsh().execSudoPrint("mkdir /ib/");
+        //getVmSsh().execSudoPrint("mount -t 9p -o rw,trans=virtio,version=9p2000.L mounted /ib/");
     }
 
     @Override
@@ -50,7 +50,7 @@ public class VirshProvisioningTask extends ProvisioningTask {
         //getSsh().execSudoPrint("mkisofs -o " + Ssh.quote(vmPath() + "/helper.iso") +" " + Ssh.quote(vmPath() + "/helper"));
 
         getHypervisorSsh().execSudoPrint("rm " + Ssh.quote(vmPath() + "/vm.xml"));
-        getHypervisorSsh().execSudoPrint("bash -c \"echo '" + createVmXml(getVirtualMachine()) + "' > " + Ssh.quote(vmPath() + "/vm.xml") + "\"");
+        getHypervisorSsh().execSudoPrint("bash -c \"echo '" + createVmXml(getVirtualMachine(), "vm-template.xml") + "' > " + Ssh.quote(vmPath() + "/vm.xml") + "\"");
         getHypervisorSsh().execSudoPrint("virsh define " + Ssh.quote(vmPath() + "/vm.xml"));
         getHypervisorSsh().execSudoPrint("virsh autostart " +Ssh.quote(getVirtualMachine().getId()));
         getHypervisorSsh().execSudoPrint("virsh start " + Ssh.quote(getVirtualMachine().getId()));
@@ -84,6 +84,12 @@ public class VirshProvisioningTask extends ProvisioningTask {
         }
         System.out.println("Install done");
 
+
+        getHypervisorSsh().execSudoPrint("virsh destroy " +Ssh.quote(getVirtualMachine().getId()));
+        getHypervisorSsh().execSudoPrint("virsh undefine " +Ssh.quote(getVirtualMachine().getId()));
+        getHypervisorSsh().execSudoPrint("bash -c \"echo '" + createVmXml(getVirtualMachine(), "vm-run-template.xml") + "' > " + Ssh.quote(vmPath() + "/prod.xml") + "\"");
+        getHypervisorSsh().execSudoPrint("virsh define " + Ssh.quote(vmPath() + "/prod.xml"));
+        getHypervisorSsh().execSudoPrint("virsh autostart " +Ssh.quote(getVirtualMachine().getId()));
         getHypervisorSsh().execSudoPrint("virsh start " + Ssh.quote(getVirtualMachine().getId()));
     }
 
@@ -177,8 +183,8 @@ public class VirshProvisioningTask extends ProvisioningTask {
         getHypervisorSsh().execSudoPrint("rm -r " + Ssh.quote(vmPath()));
     }
 
-    private String createVmXml(VirtualMachine vm) throws IOException {
-        String xml = StreamUtils.copyToString(this.getClass().getResourceAsStream("/hypervisor/virsh/vm-template.xml"), Charset.defaultCharset());
+    private String createVmXml(VirtualMachine vm, String xmlFile) throws IOException {
+        String xml = StreamUtils.copyToString(this.getClass().getResourceAsStream("/hypervisor/virsh/" + xmlFile), Charset.defaultCharset());
 
         xml = xml
                 .replaceAll(Pattern.quote("${name}"), vm.getId())
@@ -190,12 +196,29 @@ public class VirshProvisioningTask extends ProvisioningTask {
                 .replaceAll(Pattern.quote("${helperimg}"), "/home/" + getHypervisor().getUsername() + "/" + vmPath() + "/helper.iso")
                 .replaceAll(Pattern.quote("${mac}"), vm.getMac())
                 .replaceAll(Pattern.quote("${vmdir}"), "/home/"+getHypervisor().getUsername()+"/"+vmPath())
-                .replaceAll(Pattern.quote("${filesystems}"), vm.getDiskPassthroughs().stream().map(this::toDisk).collect(Collectors.joining()))
+                .replaceAll(Pattern.quote("${filesystems}"), createDisks(vm))
                 .replace("\"", "\\\"");
         return xml;
     }
 
+    private String createDisks(VirtualMachine vm) {
+        String result = vm.getDiskPassthroughs().stream().map(this::toDisk).collect(Collectors.joining());
+
+        if(result.contains("device=\"lun\""))
+            result += "<controller type=\"scsi\" index=\"0\" model=\"virtio-scsi\"/>";
+
+        return result;
+    }
+
     private String toDisk(DiskPassthrough diskPassthrough) {
-        return null;
+        if(diskPassthrough.getType() == DiskPassthrough.Type.LUN)
+            return "<disk type=\"block\" device=\"lun\">\n" +
+                    "    <driver name=\"qemu\" type=\"raw\" cache=\"none\"/>\n" +
+                    "    <source dev=\""+ diskPassthrough.getHostSource() +"\"/>\n" +
+                    "    <target dev=\""+ diskPassthrough.getGuestTarget() +"\" bus=\"scsi\"/>\n" +
+                    //"    <address type='drive' controller='0' bus='0' target='3' unit='0'/>\n" +
+                    "  </disk>\n";
+
+        return "";
     }
 }
