@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 ip=$1
+host=$2
 
 kubectl drain master --delete-local-data --force --ignore-daemonsets
 kubectl delete node master
@@ -37,7 +38,7 @@ curl -sSL "https://raw.githubusercontent.com/kubernetes/kubernetes/${RELEASE}/bu
 systemctl enable --now kubelet
 
 kubeadm config images pull
-kubeadm init --apiserver-advertise-address=$ip --pod-network-cidr=10.244.0.0/16 --node-name=master
+kubeadm init --apiserver-advertise-address=$ip --pod-network-cidr=10.244.0.0/16 --node-name=$host
 
 rm -r $HOME/.kube
 mkdir -p $HOME/.kube

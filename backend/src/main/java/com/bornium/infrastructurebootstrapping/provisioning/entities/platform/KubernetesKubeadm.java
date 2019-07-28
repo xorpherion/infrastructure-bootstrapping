@@ -41,7 +41,7 @@ public class KubernetesKubeadm extends Kubernetes {
         ssh.copyToRemote("src/main/resources/operatingsystem/containerlinux/kubernetes/kubeadm/scripts/install.sh", folder + "/install.sh");
         ssh.execSudoPrint("chmod 777 " + folder + "/install.sh");
 
-        ssh.execSudoPrint("bash -c \"" + folder + "/install.sh "+ machine.getIp() +"\"");
+        ssh.execSudoPrint("bash -c \"" + folder + "/install.sh "+ machine.getIp() + " " + machine.getHost() +"\"");
     }
 
     private List<Machine> findRelevantMachines(List<Machine> machines) {
