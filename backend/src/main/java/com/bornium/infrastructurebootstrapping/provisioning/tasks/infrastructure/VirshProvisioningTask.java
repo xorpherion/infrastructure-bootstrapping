@@ -7,6 +7,7 @@ import com.bornium.infrastructurebootstrapping.provisioning.entities.hypervisor.
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.MachineSpec;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.passthrough.DiskPassthrough;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.passthrough.PciPassthrough;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem.OperatingSystem;
 import com.bornium.infrastructurebootstrapping.provisioning.services.AuthenticationsService;
 import org.springframework.util.StreamUtils;
@@ -196,13 +197,14 @@ public class VirshProvisioningTask extends ProvisioningTask {
                 .replaceAll(Pattern.quote("${helperimg}"), "/home/" + getHypervisor().getUsername() + "/" + vmPath() + "/helper.iso")
                 .replaceAll(Pattern.quote("${mac}"), vm.getMac())
                 .replaceAll(Pattern.quote("${vmdir}"), "/home/"+getHypervisor().getUsername()+"/"+vmPath())
-                .replaceAll(Pattern.quote("${filesystems}"), createDisks(vm))
+                .replaceAll(Pattern.quote("${devices}"), createDevices(vm))
                 .replace("\"", "\\\"");
         return xml;
     }
 
-    private String createDisks(VirtualMachine vm) {
+    private String createDevices(VirtualMachine vm) {
         String result = vm.getDiskPassthroughs().stream().map(this::toDisk).collect(Collectors.joining());
+        result += vm.getPciPassthroughs().stream().map(this::toPci).collect(Collectors.joining());
 
         if(result.contains("device=\"lun\""))
             result += "<controller type=\"scsi\" index=\"0\" model=\"virtio-scsi\"/>";
@@ -216,9 +218,16 @@ public class VirshProvisioningTask extends ProvisioningTask {
                     "    <driver name=\"qemu\" type=\"raw\" cache=\"none\"/>\n" +
                     "    <source dev=\""+ diskPassthrough.getHostSource() +"\"/>\n" +
                     "    <target dev=\""+ diskPassthrough.getGuestTarget() +"\" bus=\"scsi\"/>\n" +
-                    //"    <address type='drive' controller='0' bus='0' target='3' unit='0'/>\n" +
                     "  </disk>\n";
 
         return "";
+    }
+
+    private String toPci(PciPassthrough pciPassthrough) {
+        return "<hostdev mode=\"subsystem\" type=\"pci\" managed=\"yes\">\n" +
+                "  <source>\n" +
+                "    <address domain=\"0x"+pciPassthrough.getDomain()+"\" bus=\"0x"+pciPassthrough.getBus()+"\" slot=\"0x"+pciPassthrough.getSlot()+"\" function=\"0x"+pciPassthrough.getFunction()+"\" />" +
+                "  </source>\n" +
+                "</hostdev>\n";
     }
 }
