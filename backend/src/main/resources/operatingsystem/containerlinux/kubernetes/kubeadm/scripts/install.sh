@@ -3,8 +3,8 @@
 ip=$1
 host=$2
 
-kubectl drain master --delete-local-data --force --ignore-daemonsets
-kubectl delete node master
+kubectl drain $host --delete-local-data --force --ignore-daemonsets
+kubectl delete node $host
 kubeadm reset -f
 rm -r /var/lib/etcd
 iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
@@ -22,7 +22,7 @@ CRICTL_VERSION="v1.12.0"
 mkdir -p /opt/bin
 curl -L "https://github.com/kubernetes-incubator/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz" | tar -C /opt/bin -xz
 
-
+echo "KUBELET_EXTRA_ARGS=--volume-plugin-dir=/var/lib/kubelet/volumeplugins" > /etc/default/kubelet
 
 RELEASE="$(curl -sSL https://dl.k8s.io/release/stable.txt)"
 
