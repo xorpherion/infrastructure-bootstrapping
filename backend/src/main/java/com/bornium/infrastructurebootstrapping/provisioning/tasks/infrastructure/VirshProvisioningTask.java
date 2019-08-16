@@ -7,6 +7,7 @@ import com.bornium.infrastructurebootstrapping.provisioning.entities.hypervisor.
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.MachineSpec;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.passthrough.DiskPassthrough;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.passthrough.FileSystem;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.passthrough.PciPassthrough;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem.OperatingSystem;
 import com.bornium.infrastructurebootstrapping.provisioning.services.AuthenticationsService;
@@ -39,8 +40,11 @@ public class VirshProvisioningTask extends ProvisioningTask {
 
     @Override
     protected void postProcessVm() {
-        //getVmSsh().execSudoPrint("mkdir /ib/");
-        //getVmSsh().execSudoPrint("mount -t 9p -o rw,trans=virtio,version=9p2000.L mounted /ib/");
+        getVirtualMachine().getFileSystems().stream().forEach(fs -> {
+//            getVmSsh().execSudoPrint("mkdir -p " + fs.getVmPath());
+//            getVmSsh().execSudoPrint("mount -t 9p -o rw,trans=virtio,version=9p2000.L "+fs.getTarget()+ " " + fs.getVmPath());
+//            getVmSsh().execSudoPrint("echo '"+fs.getTarget()+"                                  "+fs.getVmPath()+"     9p         rw,trans=virtio,version=9p2000.L  0       0' >> /etc/fstab");
+        });
     }
 
     @Override
@@ -205,11 +209,19 @@ public class VirshProvisioningTask extends ProvisioningTask {
     private String createDevices(VirtualMachine vm) {
         String result = vm.getDiskPassthroughs().stream().map(this::toDisk).collect(Collectors.joining());
         result += vm.getPciPassthroughs().stream().map(this::toPci).collect(Collectors.joining());
+        result += vm.getFileSystems().stream().map(this::toFileSystem).collect(Collectors.joining());
 
         if(result.contains("device=\"lun\""))
             result += "<controller type=\"scsi\" index=\"0\" model=\"virtio-scsi\"/>";
 
         return result;
+    }
+
+    private String toFileSystem(FileSystem fileSystem) {
+        return "<filesystem type=\"mount\" accessmode=\"mapped\">\n" +
+                "            <source dir=\""+fileSystem.getSource()+"\"/>\n" +
+                "            <target dir=\""+ fileSystem.getTarget() +"\"/>\n" +
+                "        </filesystem>";
     }
 
     private String toDisk(DiskPassthrough diskPassthrough) {
