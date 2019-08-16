@@ -1,5 +1,6 @@
 package com.bornium.infrastructurebootstrapping;
 
+import com.bornium.infrastructurebootstrapping.deployment.entities.Release;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.cloud.Infrastructure;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.credentials.Credentials;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.MachineSpec;
@@ -17,14 +18,16 @@ public class Config {
     final List<Authentication> authentications;
     final List<Infrastructure> infrastructures;
     final List<Platform> platforms;
+    final List<Release> releases;
 
-    public Config(List<MachineSpec> machineSpecs, List<OperatingSystem> operatingSystems, List<Credentials> credentials, List<Authentication> authentications, List<Infrastructure> infrastructures, List<Platform> platforms) {
+    public Config(List<MachineSpec> machineSpecs, List<OperatingSystem> operatingSystems, List<Credentials> credentials, List<Authentication> authentications, List<Infrastructure> infrastructures, List<Platform> platforms, List<Release> releases) {
         this.machineSpecs = machineSpecs;
         this.operatingSystems = operatingSystems;
         this.credentials = credentials;
         this.authentications = authentications;
         this.infrastructures = infrastructures;
         this.platforms = platforms;
+        this.releases = releases;
     }
 
     public List<Infrastructure> getInfrastructures() {
@@ -49,5 +52,9 @@ public class Config {
 
     public List<Platform> getPlatforms() {
         return platforms;
+    }
+
+    public List<Release> getReleases() {
+        return releases;
     }
 }
