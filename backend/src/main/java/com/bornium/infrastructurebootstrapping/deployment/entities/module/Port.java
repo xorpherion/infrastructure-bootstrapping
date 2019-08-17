@@ -5,11 +5,13 @@ public class Port {
     String protocol;
     String host;
     String container;
+    String name;
 
-    public Port(String protocol, String host, String container) {
+    public Port(String protocol, String host, String container, String name) {
         this.protocol = protocol;
         this.host = host;
         this.container = container;
+        this.name = name;
     }
 
     public String getProtocol() {
@@ -22,5 +24,9 @@ public class Port {
 
     public String getContainer() {
         return container;
+    }
+
+    public String getName() {
+        return name;
     }
 }

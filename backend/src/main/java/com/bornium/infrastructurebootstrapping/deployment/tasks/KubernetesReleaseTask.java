@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class KubernetesReleaseTask {
 
@@ -80,7 +81,22 @@ public class KubernetesReleaseTask {
     }
 
     private Map[] createServices(Module module) {
-        return null;
+        return IntStream.range(0,getControllerType(module) == ControllerType.STATEFULSET ? Integer.parseInt(module.getReplication()) : 1)
+                .mapToObj(i -> ImmutableMap
+                        .builder()
+                        .put("apiVersion","v1")
+                        .put("kind","Service")
+                        .put("metadata",ImmutableMap.builder()
+                                .put("name",module.getId())
+                                .build())
+                        .put("spec",ImmutableMap.builder()
+                                .put("clusterIP", getControllerType(module) == ControllerType.STATEFULSET ? "None" : Optional.empty())
+                                .put("selector",ImmutableMap.builder()
+                                        .put(getControllerType(module) == ControllerType.STATEFULSET ? "statefulset.kubernetes.io/pod-name" :"app",getControllerType(module) == ControllerType.STATEFULSET ? module.getId()+"-"+i : module.getId())
+                                        .build())
+                                .put("ports",portsService(module))
+                                .build())
+                        .build()).toArray(Map[]::new);
     }
 
     private Map[] createControllers(Module module) {
@@ -144,15 +160,26 @@ public class KubernetesReleaseTask {
                 .put("name", module.getId())
                 .put("image", module.getImage())
                 .put("imagePullPolicy","Always")
-                .put("ports", ports(module))
+                .put("ports", portsController(module))
                 .build());
     }
 
-    private Object ports(Module module) {
+    private Object portsController(Module module) {
         if(module.getPorts().size() == 0)
             return Optional.empty();
         return module.getPorts().stream().map(port -> ImmutableMap.builder()
                 .put("containerPort",Integer.parseInt(port.getContainer()))
+                .build()).collect(Collectors.toList());
+    }
+
+    private Object portsService(Module module) {
+        if(module.getPorts().size() == 0)
+            return Optional.empty();
+        return module.getPorts().stream().map(port -> ImmutableMap.builder()
+                .put("protocol",port.getProtocol().toUpperCase())
+                .put("port",Integer.parseInt(port.getHost()))
+                .put("targetPort",Integer.parseInt(port.getContainer()))
+                .put("name",port.getName())
                 .build()).collect(Collectors.toList());
     }
 
