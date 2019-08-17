@@ -1,12 +1,11 @@
 package com.bornium.infrastructurebootstrapping.deployment.entities;
 
 import com.bornium.infrastructurebootstrapping.provisioning.entities.Base;
-import com.bornium.infrastructurebootstrapping.provisioning.entities.BaseId;
 
 import java.util.List;
+import java.util.Map;
 
-public class Release extends Base {
-
+public abstract class Release extends Base {
     List<Module> modules;
 
     public Release(String id, List<Module> modules) {

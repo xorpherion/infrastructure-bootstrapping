@@ -1,14 +1,16 @@
 package com.bornium.infrastructurebootstrapping.deployment.tasks;
 
+import com.bornium.infrastructurebootstrapping.deployment.entities.KubernetesRelease;
 import com.bornium.infrastructurebootstrapping.deployment.entities.Module;
-import com.bornium.infrastructurebootstrapping.deployment.entities.Release;
 import com.google.common.collect.ImmutableMap;
 import io.kubernetes.client.util.Yaml;
 
-import javax.swing.text.html.Option;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class KubernetesReleaseTask {
 
@@ -34,29 +36,27 @@ public class KubernetesReleaseTask {
         }
     }
 
-    private List<Release> releases;
+    private KubernetesRelease release;
 
-    public KubernetesReleaseTask(List<Release> releases) {
-
-        this.releases = releases;
+    public KubernetesReleaseTask(KubernetesRelease release) {
+        this.release = release;
     }
 
     public void create(){
-        releases.stream().forEach(release -> {
-            release.getModules().stream().forEach(module -> {
-                Arrays.asList(
-                        createControllers(module),
-                        createServices(module),
-                        createPersistentVolumes(module),
-                        createPersistentVolumeClaims(module)
-                )
-                        .stream()
-                        .filter(m -> m != null)
-                        .flatMap(mArr -> Arrays.asList(mArr).stream())
-                        .map(m -> removeNullValuesRecursive(m))
-                        .forEach(this::writeDescriptor);
+        release.getModules().stream().parallel().forEach(module -> {
+                        Arrays.asList(
+                                createControllers(module),
+                                createServices(module),
+                                createPersistentVolumes(module),
+                                createPersistentVolumeClaims(module)
+                        )
+                                .stream()
+                                .parallel()
+                                .filter(m -> m != null)
+                                .flatMap(mArr -> Arrays.asList(mArr).stream())
+                                .map(m -> removeNullValuesRecursive(m))
+                                .forEach(m -> writeDescriptor(module, m));
             });
-        });
     }
 
     private Map removeNullValuesRecursive(Map<String,Object> m) {
@@ -112,7 +112,7 @@ public class KubernetesReleaseTask {
                                 .put("app", module.getId())
                                 .build())
                         .build())
-                .put("servieName",module.getId())
+                .put("serviceName",getControllerType(module) == ControllerType.STATEFULSET ? module.getId() : Optional.empty())
                 .put("replicas", replication(module))
                 .put("template",ImmutableMap.builder()
                         .put("metadata",ImmutableMap.builder()
@@ -122,9 +122,14 @@ public class KubernetesReleaseTask {
                                 .build())
                         .put("spec",ImmutableMap.builder()
                                 .put("containers",containers(module))
+                                .put("imagePullSecrets", imagePullSecrets())
                                 .build())
                         .build())
                 .build();
+    }
+
+    private List<Map<String, String>> imagePullSecrets() {
+        return release.getDockerRegistryDomainToSecret().entrySet().stream().map(e -> ImmutableMap.of("name",e.getValue())).collect(Collectors.toList());
     }
 
     private Object replication(Module module) {
@@ -138,7 +143,7 @@ public class KubernetesReleaseTask {
         return Arrays.asList(ImmutableMap.builder()
                 .put("name", module.getId())
                 .put("image", module.getImage())
-                .put("imagePullPolicy","always")
+                .put("imagePullPolicy","Always")
                 .put("ports", ports(module))
                 .build());
     }
@@ -147,7 +152,7 @@ public class KubernetesReleaseTask {
         if(module.getPorts().size() == 0)
             return Optional.empty();
         return module.getPorts().stream().map(port -> ImmutableMap.builder()
-                .put("containerPort",port.getContainer())
+                .put("containerPort",Integer.parseInt(port.getContainer()))
                 .build()).collect(Collectors.toList());
     }
 
@@ -157,7 +162,21 @@ public class KubernetesReleaseTask {
                 .build();
     }
 
-    private void writeDescriptor(Map map) {
-        System.out.println(Yaml.getSnakeYaml().dump(map));
+    private void writeDescriptor(Module module, Map map) {
+        Path p = Paths.get("tmp/release/");
+        try {
+            if(Files.notExists(p)) {
+                Files.createDirectories(p);
+            }
+
+            Path filename = p.resolve(module.getId() + "-" + map.get("kind").toString().toLowerCase() + ".yaml");
+
+            if(Files.exists(filename))
+                Files.delete(filename);
+
+            Files.write(filename, Yaml.dump(map).getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
