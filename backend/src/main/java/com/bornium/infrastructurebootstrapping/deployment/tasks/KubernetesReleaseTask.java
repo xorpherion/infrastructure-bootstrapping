@@ -87,7 +87,7 @@ public class KubernetesReleaseTask {
                         .put("apiVersion","v1")
                         .put("kind","Service")
                         .put("metadata",ImmutableMap.builder()
-                                .put("name",module.getId() + "-" + i)
+                                .put("name",getControllerType(module) == ControllerType.STATEFULSET ? module.getId() + "-" + i : module.getId())
                                 .build())
                         .put("spec",ImmutableMap.builder()
                                 .put("clusterIP", getControllerType(module) == ControllerType.STATEFULSET ? "None" : Optional.empty())
