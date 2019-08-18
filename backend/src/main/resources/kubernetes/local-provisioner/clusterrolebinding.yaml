@@ -1,0 +1,13 @@
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: local-directory-provisioner
+  namespace: ldp
+subjects:
+  - kind: ServiceAccount
+    name: local-directory-provisioner
+    namespace: ldp
+roleRef:
+  kind: ClusterRole
+  name: local-directory-provisioner
+  apiGroup: rbac.authorization.k8s.io

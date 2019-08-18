@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: local-directory-provisioner
+  namespace: ldp
+subjects:
+- kind: User
+  name: system:serviceaccount:ldp:local-directory-provisioner
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: local-directory-provisioner
+  apiGroup: rbac.authorization.k8s.io

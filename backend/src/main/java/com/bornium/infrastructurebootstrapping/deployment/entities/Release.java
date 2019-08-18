@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class Release extends Base {
-    List<Module> modules;
+
+    final List<Module> modules;
 
     public Release(String id, List<Module> modules) {
         super(id);

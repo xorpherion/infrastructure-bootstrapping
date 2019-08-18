@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: local-directory-provisioner
+  name: local-directory-provisioner
+  namespace: ldp
+spec:
+  selector:
+    matchLabels:
+      app: local-directory-provisioner
+  template:
+    metadata:
+      labels:
+        app: local-directory-provisioner
+    spec:
+      imagePullSecrets:
+      - name: bornium-docker-hub
+      containers:
+      - env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
+        image: dockerhub.bornium.com/k8s-local-provisioner:latest
+        command:
+        - /usr/local/bin/local-directory-provisioner
+        - -v=4
+        name: local-directory-provisioner
+        volumeMounts: []
+        resources:
+          requests:
+            memory: "50Mi"
+          limits:
+            memory: "50Mi"
+      volumes: []
+      serviceAccountName: local-directory-provisioner
+  updateStrategy:
+    type: RollingUpdate

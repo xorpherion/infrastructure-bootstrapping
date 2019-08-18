@@ -14,7 +14,7 @@ public class Module extends Base {
     String image;
     List<Port> ports;
     List<Mount> mounts;
-    final Map environment;
+    final Map<String,String> environment;
     final String replication;
     final boolean stateful;
 
@@ -40,7 +40,7 @@ public class Module extends Base {
         return mounts;
     }
 
-    public Map getEnvironment() {
+    public Map<String,String> getEnvironment() {
         return environment;
     }
 

@@ -1,8 +1,9 @@
 package com.bornium.infrastructurebootstrapping.deployment.entities.module;
 
-import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.Disk;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.Base;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.Memory;
 
-public class Mount {
+public class Mount extends Base {
 
     public enum Type{
         LOCAL,
@@ -10,24 +11,31 @@ public class Mount {
     }
 
     Type type;
-    String host;
-    String container;
+    String storageName;
+    String containerPath;
+    Memory storageSize;
 
-    public Mount( Type type, String host, String container) {
+    public Mount(String id, Type type, String storageName, String containerPath, Memory storageSize) {
+        super(id);
         this.type = type;
-        this.host = host;
-        this.container = container;
+        this.storageName = storageName;
+        this.containerPath = containerPath;
+        this.storageSize = storageSize;
     }
 
     public Type getType() {
         return type;
     }
 
-    public String getHost() {
-        return host;
+    public String getStorageName() {
+        return storageName;
     }
 
-    public String getContainer() {
-        return container;
+    public String getContainerPath() {
+        return containerPath;
+    }
+
+    public Memory getStorageSize() {
+        return storageSize;
     }
 }

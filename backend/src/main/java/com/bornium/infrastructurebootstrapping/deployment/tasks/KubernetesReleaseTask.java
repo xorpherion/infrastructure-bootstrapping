@@ -6,12 +6,13 @@ import com.google.common.collect.ImmutableMap;
 import io.kubernetes.client.util.Yaml;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class KubernetesReleaseTask {
 
@@ -44,6 +45,108 @@ public class KubernetesReleaseTask {
     }
 
     public void create(){
+        writeClusterEssentialsDescriptors();
+        writeStorageClassDescriptors();
+        writeModuleDescriptors();
+    }
+
+    private void writeClusterEssentialsDescriptors() {
+        loadEssential("local-provisioner").stream()
+                .map(m -> {
+                    if(!m.get("kind").toString().toLowerCase().equals("daemonset"))
+                        return m;
+
+                    ((Map)((List)((Map)((Map)((Map)m.get("spec")).get("template")).get("spec")).get("containers")).get(0)).put("volumeMounts",ldpVolumeMounts());
+                    ((Map)((Map)((Map)m.get("spec")).get("template")).get("spec")).put("volumes",ldpVolumes());
+                    return m;
+                })
+                .forEach(m -> writeDescriptor("local-provisioner",m));
+    }
+
+    private Object ldpVolumes() {
+        return release.getLocalStorages().stream().map(ls -> ImmutableMap.builder()
+                .put("hostPath", ImmutableMap.builder()
+                        .put("path",ls.getHostpath())
+                        .put("type","")
+                        .build())
+                .put("name",ls.getId())
+                .build()).collect(Collectors.toList());
+    }
+
+    private Object ldpVolumeMounts() {
+        return release.getLocalStorages().stream().map(ls -> ImmutableMap.builder()
+                .put("mountPath",ls.getHostpath())
+                .put("mountPropagation","HostToContainer")
+                .put("name",ls.getId())
+                .build()).collect(Collectors.toList());
+    }
+
+    private List<Map> loadEssential(String folderName) {
+        Path fixedFolderName = Paths.get("kubernetes/" + folderName);
+        try {
+            return findAllFilesInJarFolder(fixedFolderName).filter(p -> !p.toFile().isDirectory()).map(p -> {
+                try {
+                        return Yaml.loadAs(new String(Files.readAllBytes(p)),Map.class);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    private void writeEssential(String folderName) {
+        Path fixedFolderName = Paths.get("kubernetes/" + folderName);
+
+        try {
+            findAllFilesInJarFolder(fixedFolderName).filter(p -> !p.toFile().isDirectory()).forEach(p -> {
+                try {
+                    writeDescriptor(folderName,Yaml.loadAs(new String(Files.readAllBytes(p)),Map.class));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Stream<Path> findAllFilesInJarFolder(Path subPath) throws URISyntaxException, IOException {
+        URI uri = this.getClass().getClassLoader().getResource(subPath.toString()).toURI();
+        Path myPath;
+        if (uri.getScheme().equals("jar")) {
+            FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap());
+            myPath = fileSystem.getPath("/resources");
+        } else {
+            myPath = Paths.get(uri);
+        }
+        return Files.walk(myPath, Integer.MAX_VALUE);
+    }
+
+    private void writeStorageClassDescriptors() {
+            release.getLocalStorages().stream().forEach(storage -> {
+                Map sc = ImmutableMap.builder()
+                        .put("apiVersion","storage.k8s.io/v1")
+                        .put("kind","StorageClass")
+                        .put("metadata",ImmutableMap.builder()
+                                .put("name",storage.getId())
+                                .build())
+                        .put("provisioner","predic8.de/local-directory")
+                        .put("reclaimPolicy", "Retain")
+                        .put("volumeBindingMode", "WaitForFirstConsumer")
+                        .put("parameters", ImmutableMap.builder()
+                                .put("baseDir",storage.getHostpath())
+                                .build())
+                        .build();
+                writeDescriptor(storage.getId(),removeNullValuesRecursive(sc));
+            });
+    }
+
+    private void writeModuleDescriptors() {
         release.getModules().stream().parallel().forEach(module -> {
                         Arrays.asList(
                                 createControllers(module),
@@ -56,7 +159,7 @@ public class KubernetesReleaseTask {
                                 .filter(m -> m != null)
                                 .flatMap(mArr -> Arrays.asList(mArr).stream())
                                 .map(m -> removeNullValuesRecursive(m))
-                                .forEach(m -> writeDescriptor(module, m));
+                                .forEach(m -> writeDescriptor(module.getId(), m));
             });
     }
 
@@ -66,6 +169,9 @@ public class KubernetesReleaseTask {
                 .map(e -> {
                     if(e.getValue() instanceof Map)
                         return new HashMap.SimpleEntry(e.getKey(), removeNullValuesRecursive((Map<String, Object>) e.getValue()));
+
+                    if(e.getValue() instanceof List)
+                        return new HashMap.SimpleEntry(e.getKey(), ((List) e.getValue()).stream().filter(entry -> entry instanceof Map).map(map -> removeNullValuesRecursive((Map)map)).collect(Collectors.toList()));
 
                     return e;
                 })
@@ -141,7 +247,31 @@ public class KubernetesReleaseTask {
                                 .put("imagePullSecrets", imagePullSecrets())
                                 .build())
                         .build())
+                .putAll(getControllerType(module) == ControllerType.STATEFULSET ? ImmutableMap.builder().put("volumeClaimTemplates", createVolumeClaimTemplates(module)).build() : emptyMap())
                 .build();
+    }
+
+    private List<Map> createVolumeClaimTemplates(Module module) {
+        return module.getMounts().stream().map(mount -> {
+            return ImmutableMap.builder()
+                    .put("metadata", ImmutableMap.builder()
+                            .put("name",mount.getId())
+                            .build())
+                    .put("spec",ImmutableMap.builder()
+                            .put("accessModes", Arrays.asList("ReadWriteOnce"))
+                            .put("storageClassName",mount.getStorageName())
+                            .put("resources",ImmutableMap.builder()
+                                    .put("requests", ImmutableMap.builder()
+                                            .put("storage", mount.getStorageSize().bytes())
+                                            .build())
+                                    .build())
+                            .build())
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    private Map emptyMap() {
+        return ImmutableMap.builder().build();
     }
 
     private List<Map<String, String>> imagePullSecrets() {
@@ -159,9 +289,31 @@ public class KubernetesReleaseTask {
         return Arrays.asList(ImmutableMap.builder()
                 .put("name", module.getId())
                 .put("image", module.getImage())
+                .put("env", module.getEnvironment().size() != 0 ? environment(module) : Optional.empty())
                 .put("imagePullPolicy","Always")
                 .put("ports", portsController(module))
+                .put("volumeMounts", volumeMounts(module))
                 .build());
+    }
+
+    private Object environment(Module module) {
+        if(module.getEnvironment().size() == 0)
+            return Optional.empty();
+
+        return module.getEnvironment().entrySet().stream().map(e -> ImmutableMap.builder()
+                .put("name",e.getKey())
+                .put("value",e.getValue())
+                .build())
+                .collect(Collectors.toList());
+    }
+
+    private Object volumeMounts(Module module) {
+        return module.getMounts().stream().map(mount -> {
+            return ImmutableMap.builder()
+                    .put("name",mount.getId())
+                    .put("mountPath",mount.getContainerPath())
+                    .build();
+        }).collect(Collectors.toList());
     }
 
     private Object portsController(Module module) {
@@ -169,6 +321,7 @@ public class KubernetesReleaseTask {
             return Optional.empty();
         return module.getPorts().stream().map(port -> ImmutableMap.builder()
                 .put("containerPort",Integer.parseInt(port.getContainer()))
+                .put("name",port.getName())
                 .build()).collect(Collectors.toList());
     }
 
@@ -189,14 +342,14 @@ public class KubernetesReleaseTask {
                 .build();
     }
 
-    private void writeDescriptor(Module module, Map map) {
+    private void writeDescriptor(String name, Map map) {
         Path p = Paths.get("tmp/release/");
         try {
             if(Files.notExists(p)) {
                 Files.createDirectories(p);
             }
 
-            Path filename = p.resolve(module.getId() + "-" + map.get("kind").toString().toLowerCase() + ".yaml");
+            Path filename = p.resolve(getFilePrefix(map) + "-" + name + "-" + map.get("kind").toString().toLowerCase() + ".yaml");
 
             if(Files.exists(filename))
                 Files.delete(filename);
@@ -205,5 +358,19 @@ public class KubernetesReleaseTask {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private String getFilePrefix(Map map) {
+        String kind = map.get("kind").toString().toLowerCase();
+
+        Map<String,Integer> prefixes = new HashMap<>();
+
+        Arrays.asList("namespace").stream().forEach( v -> prefixes.put(v,0));
+        Arrays.asList("storageclass","clusterrole","clusterrolebinding","role","rolebinding","serviceaccount").stream().forEach( v -> prefixes.put(v,1));
+
+        if(prefixes.containsKey(kind))
+            return String.valueOf(prefixes.get(kind));
+
+        return "99";
     }
 }
