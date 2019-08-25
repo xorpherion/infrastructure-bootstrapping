@@ -1,6 +1,7 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities.operatingsystem;
 
 import com.bornium.infrastructurebootstrapping.base.access.Ssh;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.passthrough.DiskPassthrough;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.passthrough.FileSystem;
 import com.bornium.infrastructurebootstrapping.provisioning.tasks.infrastructure.ProvisioningTask;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ContainerLinux extends OperatingSystem {
 
@@ -55,14 +57,25 @@ public class ContainerLinux extends OperatingSystem {
     }
 
     private String mounts(ProvisioningTask task) {
-        return task.getVirtualMachine().getFileSystems().stream().map(this::fsToIgnition).collect(Collectors.joining(","));
+        return Stream.of(
+                task.getVirtualMachine().getFileSystems().stream().map(this::fsToIgnition).collect(Collectors.joining(",")),
+                task.getVirtualMachine().getDiskPassthroughs().stream().map(this::diskToIgnition).collect(Collectors.joining(","))
+                ).collect(Collectors.joining("\n"));
     }
 
     private String fsToIgnition(FileSystem fileSystem) {
         return "{\n" +
-                "        \\\"contents\\\": \\\"[Unit]\\nBefore=local-fs.target\\n[Mount]\\nWhat="+fileSystem.getTarget()+"\\nWhere="+fileSystem.getVmPath()+"\\nType=9p\\nOptions=rw,trans=virtio,version=9p2000.L\\n[Install]\\nWantedBy=local-fs.target\\\",\r\n" +
+                "        \\\"contents\\\": \\\"[Unit]\\nBefore=local-fs.target\\n[Mount]\\nWhat="+fileSystem.getTarget()+"\\nWhere="+fileSystem.getVmPath()+"\\nType=9p\\nOptions=rw,trans=virtio,version=9p2000.L,msize=524288\\n[Install]\\nWantedBy=local-fs.target\\\",\r\n" +
                 "        \\\"enable\\\": true,\r\n" +
                 "        \\\"name\\\": \\\""+fileSystem.getVmPath().replaceAll(Pattern.quote("/"),"-").substring(1) + ".mount\\\"\r\n" +
+                "        }";
+    }
+
+    private String diskToIgnition(DiskPassthrough dp) {
+        return "{\n" +
+                "        \\\"contents\\\": \\\"[Unit]\\nBefore=local-fs.target\\n[Mount]\\nWhat="+dp.getGuestTarget()+"\\nWhere="+dp.getMountPath()+"\\nType=ext4\\nOptions=rw\\n[Install]\\nWantedBy=local-fs.target\\\",\r\n" +
+                "        \\\"enable\\\": true,\r\n" +
+                "        \\\"name\\\": \\\""+dp.getMountPath().replaceAll(Pattern.quote("/"),"-").substring(1) + ".mount\\\"\r\n" +
                 "        }";
     }
 

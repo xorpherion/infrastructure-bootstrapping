@@ -2,6 +2,7 @@ package com.bornium.infrastructurebootstrapping.deployment.tasks;
 
 import com.bornium.infrastructurebootstrapping.deployment.entities.KubernetesRelease;
 import com.bornium.infrastructurebootstrapping.deployment.entities.Module;
+import com.bornium.infrastructurebootstrapping.deployment.entities.module.Mount;
 import com.google.common.collect.ImmutableMap;
 import io.kubernetes.client.util.Yaml;
 
@@ -245,10 +246,38 @@ public class KubernetesReleaseTask {
                         .put("spec",ImmutableMap.builder()
                                 .put("containers",containers(module))
                                 .put("imagePullSecrets", imagePullSecrets())
+                                .put("volumes",getControllerType(module) == ControllerType.STATEFULSET ? Optional.empty() : volumes(module))
+                                .put("hostNetwork", release.getGateway() != null && release.getGateway().equals(module.getId()) ? true : Optional.empty())
+                                .put("dnsPolicy", "None")//release.getGateway() != null && release.getGateway().equals(module.getId()) ?"ClusterFirstWithHostNet" : Optional.empty())
+                                .put("dnsConfig", ImmutableMap.builder()
+                                        .put("nameservers", new String[]{"10.96.0.10"})
+                                        .put("searches",new String[]{"default.svc.cluster.local", "svc.cluster.local", "cluster.local"})
+                                        .put("options",Arrays.asList(
+                                                ImmutableMap.builder()
+                                                        .put("name","ndots")
+                                                        .put("value","5")
+                                                        .build()
+                                        ))
+                                        .build())
                                 .build())
                         .build())
                 .putAll(getControllerType(module) == ControllerType.STATEFULSET ? ImmutableMap.builder().put("volumeClaimTemplates", createVolumeClaimTemplates(module)).build() : emptyMap())
                 .build();
+    }
+
+    private Object volumes(Module module) {
+        List<ImmutableMap<Object, Object>> collect = module.getMounts().stream().filter(mount -> mount.getType() == Mount.Type.SECRET).map(mount -> ImmutableMap.builder()
+                .put("name", mount.getId())
+                .put("secret", ImmutableMap.builder()
+                        .put("secretName", mount.getStorageName())
+                        .build()
+                )
+                .build())
+                .collect(Collectors.toList());
+
+        if(collect.size() == 0)
+            return Optional.empty();
+        return collect;
     }
 
     private List<Map> createVolumeClaimTemplates(Module module) {
@@ -258,7 +287,7 @@ public class KubernetesReleaseTask {
                             .put("name",mount.getId())
                             .build())
                     .put("spec",ImmutableMap.builder()
-                            .put("accessModes", Arrays.asList("ReadWriteOnce"))
+                            .put("accessModes", new String[]{"ReadWriteOnce"})
                             .put("storageClassName",mount.getStorageName())
                             .put("resources",ImmutableMap.builder()
                                     .put("requests", ImmutableMap.builder()

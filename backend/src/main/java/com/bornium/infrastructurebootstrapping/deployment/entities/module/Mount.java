@@ -7,7 +7,9 @@ public class Mount extends Base {
 
     public enum Type{
         LOCAL,
-        NETWORK
+        NETWORK,
+        SECRET,
+        CONFIG
     }
 
     Type type;

@@ -6,6 +6,7 @@ import com.bornium.infrastructurebootstrapping.provisioning.entities.credentials
 import com.bornium.infrastructurebootstrapping.provisioning.entities.hypervisor.Hypervisor;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.MachineSpec;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.VirtualMachine;
+import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.Volume;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.passthrough.DiskPassthrough;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.passthrough.FileSystem;
 import com.bornium.infrastructurebootstrapping.provisioning.entities.machine.passthrough.PciPassthrough;
@@ -29,6 +30,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -179,6 +181,9 @@ public class VirshProvisioningTask extends ProvisioningTask {
         getMachineSpec().getDisks().forEach(disk -> {
             getHypervisorSsh().execSudoPrint("qemu-img create -f qcow2 " + Ssh.quote(baseImagePath()) + " " + disk.getSize().bytes() + "B");
         });
+        this.getVirtualMachine().getVolumes().stream().forEach(volume -> {
+            getHypervisorSsh().execSudoPrint("qemu-img create -f qcow2 " + Ssh.quote(volume.getHostBaseDirectory() + "/" + getVirtualMachine().getId() + "-" + volume.getId() + ".qcow2") + " " + volume.getSize().bytes() + "B");
+        });
     }
 
     @Override
@@ -207,9 +212,10 @@ public class VirshProvisioningTask extends ProvisioningTask {
     }
 
     private String createDevices(VirtualMachine vm) {
-        String result = vm.getDiskPassthroughs().stream().map(this::toDisk).collect(Collectors.joining());
+        String result = IntStream.range(0,vm.getDiskPassthroughs().size()).mapToObj(i -> toDisk(vm.getDiskPassthroughs().get(i),i)).collect(Collectors.joining());
         result += vm.getPciPassthroughs().stream().map(this::toPci).collect(Collectors.joining());
         result += vm.getFileSystems().stream().map(this::toFileSystem).collect(Collectors.joining());
+        result += vm.getVolumes().stream().map(this::toVolume).collect(Collectors.joining());
 
         if(result.contains("device=\"lun\""))
             result += "<controller type=\"scsi\" index=\"0\" model=\"virtio-scsi\"/>";
@@ -224,15 +230,30 @@ public class VirshProvisioningTask extends ProvisioningTask {
                 "        </filesystem>";
     }
 
-    private String toDisk(DiskPassthrough diskPassthrough) {
-        if(diskPassthrough.getType() == DiskPassthrough.Type.LUN)
-            return "<disk type=\"block\" device=\"lun\">\n" +
-                    "    <driver name=\"qemu\" type=\"raw\" cache=\"none\"/>\n" +
-                    "    <source dev=\""+ diskPassthrough.getHostSource() +"\"/>\n" +
-                    "    <target dev=\""+ diskPassthrough.getGuestTarget() +"\" bus=\"scsi\"/>\n" +
-                    "  </disk>\n";
+    private String toDisk(DiskPassthrough diskPassthrough, int i) {
+        return "<disk type=\"block\" device=\""+diskPassthrough.getType().toString().toLowerCase()+"\">\n" +
+                "    <driver name=\"qemu\" type=\"raw\" cache=\"none\"/>\n" +
+                "    <source dev=\""+ diskPassthrough.getHostSource() +"\"/>\n" +
+                "    <target dev=\""+ getDeviceName(diskPassthrough,i) +"\" bus=\""+ getBus(diskPassthrough)+"\"/>\n" +
+                "    <alias name=\"ua-"+diskPassthrough.getId()+
+                "\"/>" +
+                "  </disk>\n";
+    }
 
-        return "";
+    private String getDeviceName(DiskPassthrough diskPassthrough, int i) {
+        switch (diskPassthrough.getType()){
+            case LUN: return "sd" + Character.toString(((char) 65 + i)).toLowerCase();
+            case DISK: return "vd" + Character.toString(((char) 65 + i)).toLowerCase();
+        }
+        throw new RuntimeException("NYI");
+    }
+
+    private String getBus(DiskPassthrough diskPassthrough) {
+        switch (diskPassthrough.getType()){
+            case LUN: return "scsi";
+            case DISK: return "virtio";
+        }
+        throw new RuntimeException("NYI");
     }
 
     private String toPci(PciPassthrough pciPassthrough) {
@@ -241,5 +262,13 @@ public class VirshProvisioningTask extends ProvisioningTask {
                 "    <address domain=\"0x"+pciPassthrough.getDomain()+"\" bus=\"0x"+pciPassthrough.getBus()+"\" slot=\"0x"+pciPassthrough.getSlot()+"\" function=\"0x"+pciPassthrough.getFunction()+"\" />" +
                 "  </source>\n" +
                 "</hostdev>\n";
+    }
+
+    private String toVolume(Volume volume){
+        return "<disk type=\"file\" device=\"disk\">\n" +
+                "            <driver name=\"qemu\" type=\"qcow2\"/>\n" +
+                "            <source file=\""+volume.getHostBaseDirectory()+ "/"+getVirtualMachine().getId() +"-"+volume.getId()+".qcow2"+"\"/>\n" +
+                "            <target dev=\""+volume.getGuestDevice() +"\" bus=\"ide\"/>\n" +
+                "        </disk>";
     }
 }

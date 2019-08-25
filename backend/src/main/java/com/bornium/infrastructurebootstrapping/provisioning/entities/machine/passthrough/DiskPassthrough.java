@@ -1,20 +1,25 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities.machine.passthrough;
 
-public class DiskPassthrough  {
+import com.bornium.infrastructurebootstrapping.provisioning.entities.Base;
+
+public class DiskPassthrough extends Base {
 
     public enum Type{
-        FILE,
+        DISK,
         LUN
     }
 
     Type type;
     String hostSource;
     String guestTarget;
+    final String mountPath;
 
-    public DiskPassthrough(Type type, String hostSource, String guestTarget) {
+    public DiskPassthrough(String id, Type type, String hostSource, String guestTarget, String mountPath) {
+        super(id);
         this.type = type;
         this.hostSource = hostSource;
         this.guestTarget = guestTarget;
+        this.mountPath = mountPath;
     }
 
     public Type getType() {
@@ -27,5 +32,9 @@ public class DiskPassthrough  {
 
     public String getGuestTarget() {
         return guestTarget;
+    }
+
+    public String getMountPath() {
+        return mountPath;
     }
 }

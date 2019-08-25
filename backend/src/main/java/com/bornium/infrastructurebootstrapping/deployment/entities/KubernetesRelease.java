@@ -7,11 +7,13 @@ public class KubernetesRelease extends Release {
 
     final List<Storage> localStorages;
     private final Map<String, String> dockerRegistryDomainToSecret;
+    final String gateway;
 
-    public KubernetesRelease(String id, Map<String, String> dockerRegistryDomainToSecret, List<Module> modules, List<Storage> localStorages) {
+    public KubernetesRelease(String id, Map<String, String> dockerRegistryDomainToSecret, List<Module> modules, List<Storage> localStorages, String gateway) {
         super(id, modules);
         this.dockerRegistryDomainToSecret = dockerRegistryDomainToSecret;
         this.localStorages = localStorages;
+        this.gateway = gateway;
     }
 
     public Map<String, String> getDockerRegistryDomainToSecret() {
@@ -20,5 +22,9 @@ public class KubernetesRelease extends Release {
 
     public List<Storage> getLocalStorages() {
         return localStorages;
+    }
+
+    public String getGateway() {
+        return gateway;
     }
 }
