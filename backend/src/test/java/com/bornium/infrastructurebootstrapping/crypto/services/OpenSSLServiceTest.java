@@ -23,14 +23,18 @@ public class OpenSSLServiceTest {
                 OpenSSLExtension.CA,
                 Paths.get("temp/ca-cert.pem"));
         openSSLService.createPrivateKey(Paths.get("temp/server-key.pem"), 2048);
+        SAN san = new SAN(Stream.of("*.bornium.com"), Stream.empty());
+        X509Subject subject = new X509Subject("DE", "Northrine-Westphalia", "Bonn", "Bornium Development", "bornium.com");
         openSSLService.createCsr(Paths.get("temp/server-key.pem"),
                 Paths.get("src/main/resources/files/config/openssl/openssl.conf"),
-                new X509Subject("DE", "Northrine-Westphalia", "Bonn", "Bornium Development", "*.bornium.com"),
-                new SAN(Stream.of("bornium.com"), Stream.empty()),
+                subject,
+                san,
                 Paths.get("temp/server-cert.csr"));
         openSSLService.signCsr(Paths.get("temp/ca-key.pem"),
                 Paths.get("temp/ca-cert.pem"),
                 Paths.get("src/main/resources/files/config/openssl/openssl.conf"),
+                subject,
+                san,
                 Paths.get("temp/server-cert.csr"),
                 OpenSSLExtension.SERVER,
                 Paths.get("temp/server-cert.pem"));

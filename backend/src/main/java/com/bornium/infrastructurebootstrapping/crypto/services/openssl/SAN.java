@@ -36,11 +36,11 @@ public class SAN {
         StringBuilder sb = new StringBuilder();
         List<String> col = new ArrayList<>(dns);
         for (int i = 0; i < col.size(); i++)
-            sb.append(opensslVal("DNS", i, col.get(i))).append(System.lineSeparator());
+            sb.append(opensslVal("DNS", i + 1, col.get(i))).append(System.lineSeparator());
 
         col = new ArrayList<>(ips);
         for (int i = 0; i < col.size(); i++)
-            sb.append(opensslVal("IP", i, col.get(i))).append(System.lineSeparator());
+            sb.append(opensslVal("IP", i + 1, col.get(i))).append(System.lineSeparator());
 
         return sb.toString();
     }
