@@ -1,7 +1,10 @@
 package com.bornium.infrastructurebootstrapping.provisioning.entities;
 
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
@@ -13,7 +16,7 @@ public abstract class Base {
 
     @JsonIgnore
     @Id
-    private BaseId baseId;
+    protected BaseId baseId;
 
     public Base(String id){
         this(new BaseId(id,Namespace.GLOBAL));

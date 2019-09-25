@@ -1,5 +1,6 @@
 package com.bornium.infrastructurebootstrapping.deployment.entities;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -7,9 +8,9 @@ public class KubernetesRelease extends Release {
 
     final List<Storage> localStorages;
     private final Map<String, String> dockerRegistryDomainToSecret;
-    final String gateway;
+    final HashSet<String> gateway;
 
-    public KubernetesRelease(String id, Map<String, String> dockerRegistryDomainToSecret, List<Module> modules, List<Storage> localStorages, String gateway) {
+    public KubernetesRelease(String id, Map<String, String> dockerRegistryDomainToSecret, List<Module> modules, List<Storage> localStorages, HashSet<String> gateway) {
         super(id, modules);
         this.dockerRegistryDomainToSecret = dockerRegistryDomainToSecret;
         this.localStorages = localStorages;
@@ -24,7 +25,7 @@ public class KubernetesRelease extends Release {
         return localStorages;
     }
 
-    public String getGateway() {
+    public HashSet<String> getGateway() {
         return gateway;
     }
 }

@@ -172,7 +172,7 @@ public class KubernetesReleaseTask {
                         return new HashMap.SimpleEntry(e.getKey(), removeNullValuesRecursive((Map<String, Object>) e.getValue()));
 
                     if(e.getValue() instanceof List)
-                        return new HashMap.SimpleEntry(e.getKey(), ((List) e.getValue()).stream().filter(entry -> entry instanceof Map).map(map -> removeNullValuesRecursive((Map)map)).collect(Collectors.toList()));
+                        return new HashMap.SimpleEntry(e.getKey(), Stream.concat(((List) e.getValue()).stream().filter(entry -> entry instanceof Map).map(map -> removeNullValuesRecursive((Map) map)), ((List) e.getValue()).stream().filter(entry -> !(entry instanceof Map))).collect(Collectors.toList()));
 
                     return e;
                 })
@@ -247,7 +247,7 @@ public class KubernetesReleaseTask {
                                 .put("containers",containers(module))
                                 .put("imagePullSecrets", imagePullSecrets())
                                 .put("volumes",getControllerType(module) == ControllerType.STATEFULSET ? Optional.empty() : volumes(module))
-                                .put("hostNetwork", release.getGateway() != null && release.getGateway().equals(module.getId()) ? true : Optional.empty())
+                                .put("hostNetwork", release.getGateway().size() > 0 && release.getGateway().contains(module.getId()) ? true : Optional.empty())
                                 .put("dnsPolicy", "None")//release.getGateway() != null && release.getGateway().equals(module.getId()) ?"ClusterFirstWithHostNet" : Optional.empty())
                                 .put("dnsConfig", ImmutableMap.builder()
                                         .put("nameservers", new String[]{"10.96.0.10"})
@@ -266,7 +266,7 @@ public class KubernetesReleaseTask {
     }
 
     private Object volumes(Module module) {
-        List<ImmutableMap<Object, Object>> collect = module.getMounts().stream().filter(mount -> mount.getType() == Mount.Type.SECRET).map(mount -> ImmutableMap.builder()
+        List<ImmutableMap<Object, Object>> secrets = module.getMounts().stream().filter(mount -> mount.getType() == Mount.Type.SECRET).map(mount -> ImmutableMap.builder()
                 .put("name", mount.getId())
                 .put("secret", ImmutableMap.builder()
                         .put("secretName", mount.getStorageName())
@@ -274,6 +274,17 @@ public class KubernetesReleaseTask {
                 )
                 .build())
                 .collect(Collectors.toList());
+
+        List<ImmutableMap<Object, Object>> configs = module.getMounts().stream().filter(mount -> mount.getType() == Mount.Type.CONFIG).map(mount -> ImmutableMap.builder()
+                .put("name", mount.getId())
+                .put("configMap", ImmutableMap.builder()
+                        .put("name", mount.getStorageName())
+                        .build()
+                )
+                .build())
+                .collect(Collectors.toList());
+
+        List<ImmutableMap<Object, Object>> collect = Stream.concat(secrets.stream(), configs.stream()).collect(Collectors.toList());
 
         if(collect.size() == 0)
             return Optional.empty();
@@ -322,7 +333,17 @@ public class KubernetesReleaseTask {
                 .put("imagePullPolicy","Always")
                 .put("ports", portsController(module))
                 .put("volumeMounts", volumeMounts(module))
+                .put("securityContext", module.getCapabilities().size() > 0 ? securityContext(module) : Optional.empty())
                 .build());
+    }
+
+    private Object securityContext(Module module) {
+        return ImmutableMap.builder()
+                .put("capabilities", ImmutableMap.builder()
+                        .put("add", module.getCapabilities().stream().collect(Collectors.toList()))
+                        .build()
+                )
+                .build();
     }
 
     private Object environment(Module module) {
@@ -341,6 +362,7 @@ public class KubernetesReleaseTask {
             return ImmutableMap.builder()
                     .put("name",mount.getId())
                     .put("mountPath",mount.getContainerPath())
+                    .put("subPath", mount.getSingleFileName() != null ? mount.getSingleFileName() : Optional.empty())
                     .build();
         }).collect(Collectors.toList());
     }
@@ -350,6 +372,7 @@ public class KubernetesReleaseTask {
             return Optional.empty();
         return module.getPorts().stream().map(port -> ImmutableMap.builder()
                 .put("containerPort",Integer.parseInt(port.getContainer()))
+                .put("protocol", port.getProtocol().toUpperCase())
                 .put("name",port.getName())
                 .build()).collect(Collectors.toList());
     }
